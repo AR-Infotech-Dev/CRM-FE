@@ -1,4 +1,55 @@
+import { Code } from "lucide-react";
 import { API_BASE_URL, DEFAULT_HEADERS } from "./config";
+import axios from 'axios';
+
+export const makeRequest = async (url, options = {}) => {
+  try {
+    const {
+      method = "GET",
+      headers = {},
+      body = null,
+      params = null,
+    } = options;
+    console.log('method : ', method);
+
+    const config = {
+      url,
+      baseURL: API_BASE_URL,
+      method,
+      headers: {
+        ...DEFAULT_HEADERS,
+        ...headers,
+      },
+      data: body,     // for POST, PUT
+      params: params, // for GET query params
+    };
+    const res = await axios(config);
+    return {
+      status: res.status,
+      ...res.data
+    };
+
+  } catch (error) {
+    console.log("Axios Error:", error.response);
+    if (error.response) {
+      return {
+        success: false,
+        msg: error.response.data?.message || "Server error",
+        status: error.response.status,
+      };
+    } else if (error.request) {
+      return {
+        success: false,
+        msg: "No response from server",
+      };
+    } else {
+      return {
+        success: false,
+        msg: error.message,
+      };
+    }
+  }
+};
 
 async function parseResponse(response) {
   const contentType = response.headers.get("content-type") || "";
@@ -19,6 +70,7 @@ async function parseResponse(response) {
 
   return payload;
 }
+
 
 export async function apiRequest(path, options = {}) {
   const { headers, ...restOptions } = options;

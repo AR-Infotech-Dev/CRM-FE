@@ -1,38 +1,49 @@
 import {
   CirclePlus,
+  Trash2,
   Eye,
   Filter,
   MoreHorizontal,
   Settings2,
   Upload,
+  RefreshCcw
 } from "lucide-react";
 import ActionButton from "../../components/ui/ActionButton";
-
+import Spinner from "../../components/ui/Spinner";
 function ModuleControls({
+  loading,
   onCreate,
+  onRefresh,
+  onDeleteSelected,
+  showDelete,
+  deleteDisabled,
+  deleteLabel = "Delete Selected",
+  deleting,
   selectedLabel = "4 Selected",
   resultsLabel = "120 Results",
   createLabel = "Add New",
+  filter
 }) {
   return (
     <div className="module-controls">
       <div className="module-toolbar-row">
         <div className="module-toolbar-left">
-          <ActionButton variant="ghostPrimary">
+          {filter}
+          {/* <ActionButton variant="ghostPrimary">
             <CirclePlus size={16} />
             Update
           </ActionButton>
-          <ActionButton>{selectedLabel}</ActionButton>
-          <ActionButton>
+          <ActionButton>{selectedLabel}</ActionButton> */}
+          {/* <ActionButton>
             <Filter size={15} />
             Filter
             <span className="pill">4</span>
-          </ActionButton>
-          <ActionButton>
+          </ActionButton> */}
+          {/* <ActionButton>
             <Settings2 size={15} />
             Filters
-          </ActionButton>
-          <span className="results-text">{resultsLabel}</span>
+          </ActionButton> */}
+          {/* <span className="results-text">{resultsLabel}</span> */}
         </div>
 
         <div className="module-toolbar-right">
@@ -40,17 +51,22 @@ function ModuleControls({
             <CirclePlus size={16} />
             {createLabel}
           </ActionButton>
-          <ActionButton>
+          <ActionButton onClick={onRefresh}>
+            {loading ? <Spinner /> : <RefreshCcw size={15} color="#bc50f7" />}
+          </ActionButton>
+          {showDelete &&
+            <ActionButton onClick={onDeleteSelected} disabled={deleteDisabled}>
+              {deleting ? <Spinner /> : <Trash2 size={15} color="#bc50f7" />}
+              {/* {deleteLabel} */}
+            </ActionButton>
+          }
+          {/* <ActionButton>
             <Upload size={15} />
             Import/Export
           </ActionButton>
-          <ActionButton>
-            <Eye size={15} />
-            View
-          </ActionButton>
           <ActionButton variant="icon">
             <MoreHorizontal size={18} />
-          </ActionButton>
+          </ActionButton> */}
         </div>
       </div>
     </div>

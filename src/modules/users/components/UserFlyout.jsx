@@ -1,12 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import ActionButton from "../../../components/ui/ActionButton";
 import FlyoutPanel from "../../../components/ui/FlyoutPanel";
 import FormField from "../../../components/ui/FormField";
 import { userFormFields, userFormInitialValues } from "../data/usersModuleData";
 
-function UserFlyout({ isOpen, onClose }) {
+function UserFlyout({ isOpen, onClose, title = "Create User", selectedUser = null }) {
   const [formData, setFormData] = useState(userFormInitialValues);
+
+  useEffect(() => {
+    if (selectedUser) {
+      setFormData({
+        userName: selectedUser.name || "",
+        email: selectedUser.email || "",
+        role: selectedUser.role || "",
+        phone: selectedUser.phone || "",
+        department: selectedUser.department || "",
+        status: selectedUser.status || "",
+      });
+      return;
+    }
+
+    setFormData(userFormInitialValues);
+  }, [selectedUser, isOpen]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -28,7 +44,7 @@ function UserFlyout({ isOpen, onClose }) {
     <FlyoutPanel
       isOpen={isOpen}
       onClose={onClose}
-      title="Create User"
+      title={title}
       closeButton={
         <button className="flyout-close" onClick={onClose} aria-label="Close panel">
           <X size={18} />

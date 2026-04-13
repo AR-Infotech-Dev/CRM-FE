@@ -1,11 +1,12 @@
 export const menuMasterColumns = [
   { key: "select", className: "check-col", checkbox: true, width: 42, minWidth: 42, resizable: false },
   { key: "favorite", className: "icon-col", width: 42, minWidth: 42, resizable: false },
-  { key: "menuId", label: "Menu ID", width: 110, minWidth: 90 },
-  { key: "name", label: "Menu Name", width: 220, minWidth: 180, cellType: "person" },
-  { key: "parent", label: "Parent Menu", width: 180, minWidth: 140, cellType: "dotText" },
-  { key: "path", label: "Route Path", width: 220, minWidth: 180, cellType: "clip" },
-  { key: "sequence", label: "Sequence", width: 120, minWidth: 100 },
+  { key: "_id", label: "_id", width: 110, minWidth: 90 },
+  { key: "menu_id", label: "Menu ID", width: 110, minWidth: 90 },
+  { key: "menu_name", label: "Menu Name", width: 220, minWidth: 180, cellType: "person" },
+  { key: "module_name", label: "Module Name", width: 180, minWidth: 140, cellType: "dotText" },
+  { key: "menu_link", label: "Menu Link", width: 220, minWidth: 180, cellType: "clip" },
+  { key: "menu_index", label: "Menu Index", width: 120, minWidth: 100 },
   { key: "status", label: "Status", width: 120, minWidth: 100, cellType: "status" },
 ];
 
@@ -34,3 +35,14 @@ export const menuMasterFormFields = [
   { name: "sequence", label: "Sequence", type: "input", placeholder: "Enter sequence" },
   { name: "status", label: "Status", type: "input", placeholder: "Enter status" },
 ];
+
+export const fields = [
+  { label: "Lead ID", value: "lead_id", type: "number" },
+  { label: "Lead Name", value: "lead_name", type: "text" },
+  { label: "Mobile No", value: "mobile_no", type: "text" },
+  { label: "Whatsapp Number", value: "whatsapp_number", type: "text" },
+  { label: "Lead Email", value: "lead_email", type: "text" },
+  { label: "Created Date", value: "created_date", type: "date" },
+];
+
+export const savedFilters = [];

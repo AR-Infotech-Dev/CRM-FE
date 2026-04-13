@@ -1,8 +1,21 @@
-import { useRef } from "react";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { ChevronUp, ChevronDown, ChevronsUpDown, Plus } from "lucide-react";
 
-function TableHeader({ columns, onResize }) {
+function TableHeader({
+  columns,
+  onResize,
+  sortConfig,
+  onSortChange,
+  allRowsSelected = false,
+  onToggleAllRows,
+  hiddenColumns = [],
+  removableColumns = [],
+  onShowColumn,
+  onHideColumn,
+  onMoveColumn,
+}) {
   const resizeStateRef = useRef(null);
+  const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
 
   const handleMouseMove = (event) => {
     if (!resizeStateRef.current) {
@@ -35,6 +48,11 @@ function TableHeader({ columns, onResize }) {
     document.addEventListener("mouseup", stopResize);
   };
 
+  const lastColumnKey = useMemo(
+    () => columns[columns.length - 1]?.key,
+    [columns]
+  );
+
   return (
     <thead>
       <tr>
@@ -45,15 +63,149 @@ function TableHeader({ columns, onResize }) {
             style={{ width: column.currentWidth, minWidth: column.currentWidth, maxWidth: column.currentWidth }}
           >
             {column.checkbox ? (
-              <input type="checkbox" />
+              <input
+                type="checkbox"
+                checked={allRowsSelected}
+                onChange={(event) => onToggleAllRows?.(event.target.checked)}
+              />
             ) : column.className === "icon-col" ? null : (
-              <span className="table-header-label">
-                <span>{column.label}</span>
-                <span className="table-header-sort">
-                  <ChevronUp size={11} />
-                  <ChevronDown size={11} />
-                </span>
-              </span>
+              <div className="table-header-shell">
+                <button
+                  type="button"
+                  className="table-header-label"
+                  onClick={() => onSortChange?.(column.key)}
+                >
+                  <span>{column.label}</span>
+                  <span className="table-header-sort">
+                    <ChevronUp
+                      size={11}
+                      opacity={sortConfig?.key === column.key && sortConfig?.direction === "asc" ? 1 : 0.35}
+                    />
+                    <ChevronDown
+                      size={11}
+                      opacity={sortConfig?.key === column.key && sortConfig?.direction === "desc" ? 1 : 0.35}
+                    />
+                  </span>
+                </button>
+                {column.key === lastColumnKey ? (
+                  <div className="table-column-picker">
+                    <button
+                      type="button"
+                      className="table-column-picker-trigger animate-ping"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setIsColumnMenuOpen((current) => !current);
+                      }}
+                    >
+                      <Plus className={''} size={10} />
+                      {/* <span>Add</span> */}
+                    </button>
+                    {isColumnMenuOpen ? (
+                      <div className="table-column-picker-menu">
+                        <div className="table-column-picker-section">
+                          <div className="table-column-picker-title">Add Columns</div>
+                          {hiddenColumns.length ? (
+                            hiddenColumns.map((item) => (
+                              <label key={item.key} className="table-column-picker-item">
+                                <input
+                                  type="checkbox"
+                                  checked={false}
+                                  onChange={(event) => {
+                                    if (event.target.checked) {
+                                      onShowColumn?.(item.key);
+                                    }
+                                  }}
+                                />
+                                <span>{item.label}</span>
+                              </label>
+                            ))
+                          ) : (
+                            <div className="table-column-picker-empty">No columns to add</div>
+                          )}
+                        </div>
+                        <div className="table-column-picker-section">
+                          <div className="table-column-picker-title">Remove Columns</div>
+                          {removableColumns.length ? (
+                            removableColumns.map((item) => (
+                              <div key={item.key} className="table-column-picker-row">
+                                <label className="table-column-picker-item">
+                                  <input
+                                    type="checkbox"
+                                    checked
+                                    onChange={(event) => {
+                                      if (!event.target.checked) {
+                                        onHideColumn?.(item.key);
+                                      }
+                                    }}
+                                  />
+                                  <span>{item.label}</span>
+                                </label>
+                                <div className="table-column-picker-actions">
+                                  <button
+                                    type="button"
+                                    className="table-column-order-button"
+                                    onClick={() => onMoveColumn?.(item.key, "up")}
+                                    disabled={item.isFirst}
+                                    title="Move up"
+                                  >
+                                    <ChevronUp size={12} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="table-column-order-button"
+                                    onClick={() => onMoveColumn?.(item.key, "down")}
+                                    disabled={item.isLast}
+                                    title="Move down"
+                                  >
+                                    <ChevronDown size={12} />
+                                  </button>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="table-column-picker-empty">No columns to remove</div>
+                          )}
+                        </div>
+                        <div className="table-column-picker-section">
+                          <div className="table-column-picker-title">Arrange Columns</div>
+                          {removableColumns.length ? (
+                            removableColumns.map((item) => (
+                              <div key={`${item.key}-arrange`} className="table-column-picker-row">
+                                <div className="table-column-picker-arrange-label">
+                                  <ChevronsUpDown size={12} />
+                                  <span>{item.label}</span>
+                                </div>
+                                <div className="table-column-picker-actions">
+                                  <button
+                                    type="button"
+                                    className="table-column-order-button"
+                                    onClick={() => onMoveColumn?.(item.key, "up")}
+                                    disabled={item.isFirst}
+                                    title="Move up"
+                                  >
+                                    <ChevronUp size={12} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="table-column-order-button"
+                                    onClick={() => onMoveColumn?.(item.key, "down")}
+                                    disabled={item.isLast}
+                                    title="Move down"
+                                  >
+                                    <ChevronDown size={12} />
+                                  </button>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="table-column-picker-empty">No columns to arrange</div>
+                          )}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
             )}
             {column.resizable === false ? null : (
               <span

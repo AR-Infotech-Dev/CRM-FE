@@ -1,23 +1,36 @@
-import { ChevronDown, X } from "lucide-react";
+import Input  from "../form-inputs/Input";
 
 function FormField({ field, value, onChange, onClear }) {
-  const label = (
-    <label className="form-label" htmlFor={field.name}>
-      {field.label}
-      {field.required ? <span className="error"> *</span> : null}
-    </label>
-  );
+  {console.log(field)}
+
+  switch (field.type) {
+    case 'text':
+        return (<Input  />)
+      break;
+  
+    default:
+      break;
+  }
+
+  // const label = (
+    
+  //   <label className="form-label" htmlFor={field.name}>
+  //     {field.label}
+  //     {field.required ? <span className="error"> *</span> : null}
+  //   </label>
+  // );
 
   if (field.type === "assignee") {
     return (
       <div className="form-group form-float">
         <div className="form-line">
-          {label}
+          {field.label || ''}
           <div className="form-shell form-shell-with-action">
             <input
               id={field.name}
               className="form-control"
               name={field.name}
+              
               value={value}
               onChange={onChange}
               placeholder={field.placeholder ?? ""}
@@ -43,7 +56,7 @@ function FormField({ field, value, onChange, onClear }) {
     return (
       <div className="form-group form-float">
         <div className="form-line">
-          {label}
+          {field.label || ''}
           <div className="form-shell">
             <div className="ws-input-group">
               <span className="phone-prefix">
@@ -69,9 +82,10 @@ function FormField({ field, value, onChange, onClear }) {
   return (
     <div className="form-group form-float">
       <div className="form-line">
-        {label}
+        {field.label || ''}
         <input
           id={field.name}
+          type="text"
           className="form-control"
           name={field.name}
           value={value}
@@ -85,3 +99,15 @@ function FormField({ field, value, onChange, onClear }) {
 }
 
 export default FormField;
+
+
+// import React from 'react'
+
+// function FormField({field, value, onChange, onClea}) {
+//   return (
+//     <>
+//     </>
+//   )
+// }
+
+// export default FormField

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, ChevronRight, Eye, KeyRound, Pencil, Plus, Trash2 } from "lucide-react";
+import { useModuleFilters } from "../../store/hooks";
 import {
   accessControlItems,
   accessPermissionColumns,
@@ -8,8 +9,8 @@ import {
 
 function AccessControlModulePage() {
   const [selectedRole, setSelectedRole] = useState(accessRoleOptions[0]);
-  const [searchTerm, setSearchTerm] = useState("");
   const [rows, setRows] = useState(accessControlItems);
+  const { filterState, setSearchText } = useModuleFilters("access-control", rows);
 
   const expandedMap = useMemo(
     () =>
@@ -25,7 +26,10 @@ function AccessControlModulePage() {
   const visibleRows = useMemo(
     () =>
       rows.filter((row) => {
-        if (searchTerm && !row.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+        if (
+          filterState.searchText &&
+          !row.name.toLowerCase().includes(filterState.searchText.toLowerCase())
+        ) {
           return false;
         }
 
@@ -35,7 +39,7 @@ function AccessControlModulePage() {
 
         return expandedMap[row.parentId];
       }),
-    [expandedMap, rows, searchTerm]
+    [expandedMap, rows, filterState.searchText]
   );
 
   const updatePermission = (rowId, permissionKey, checked) => {
@@ -120,8 +124,8 @@ function AccessControlModulePage() {
             <input
               className="access-search"
               type="text"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
+              value={filterState.searchText}
+              onChange={(event) => setSearchText(event.target.value)}
               placeholder="Search modules..."
             />
             <button className="access-text-button success" onClick={() => applySelectionToAll(true)}>

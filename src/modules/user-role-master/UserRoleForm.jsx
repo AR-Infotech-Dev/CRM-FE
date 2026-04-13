@@ -3,20 +3,29 @@ import { X } from "lucide-react";
 import ActionButton from "../../components/ui/ActionButton";
 import FlyoutPanel from "../../components/ui/FlyoutPanel";
 import FormField from "../../components/ui/FormField";
+import {
+  userRoleMasterFormFields,
+  userRoleMasterInitialValues,
+} from "./data/userRoleMasterData";
 
-function ConfigurableModuleFlyout({
-  isOpen,
-  onClose,
-  title,
-  fields,
-  initialValues,
-  columnsClassName = "form-grid form-grid-two",
-}) {
-  const [formData, setFormData] = useState(initialValues);
+function UserRoleForm({ isOpen, onClose, selectedRole }) {
+  const [formData, setFormData] = useState(userRoleMasterInitialValues);
 
   useEffect(() => {
-    setFormData(initialValues);
-  }, [initialValues, isOpen]);
+    if (selectedRole) {
+      setFormData({
+        roleName: selectedRole.name || "",
+        displayName: selectedRole.name || "",
+        roleType: selectedRole.roleType || "",
+        scope: selectedRole.scope || "",
+        description: selectedRole.description || "",
+        status: selectedRole.status || "",
+      });
+      return;
+    }
+
+    setFormData(userRoleMasterInitialValues);
+  }, [selectedRole, isOpen]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -26,39 +35,26 @@ function ConfigurableModuleFlyout({
     }));
   };
 
-  const handleSave = () => {
-    onClose();
-  };
-
-  const handleSaveAndNew = () => {
-    setFormData(initialValues);
-  };
-
   return (
     <FlyoutPanel
       isOpen={isOpen}
       onClose={onClose}
-      title={title}
+      title={selectedRole ? "Edit User Role" : "Create User Role"}
       closeButton={
         <button className="flyout-close" onClick={onClose} aria-label="Close panel">
           <X size={18} />
         </button>
       }
       footer={
-        <>
-          <ActionButton variant="flyoutPrimary" onClick={handleSave}>
-            Save
-          </ActionButton>
-          <ActionButton variant="flyoutSecondary" onClick={handleSaveAndNew}>
-            Save and New
-          </ActionButton>
-        </>
+        <ActionButton variant="flyoutPrimary" onClick={onClose}>
+          Save
+        </ActionButton>
       }
     >
       <div className="flyout-form-shell">
         <div className="ws-main-container">
-          <div className={columnsClassName}>
-            {fields.map((field) => (
+          <div className="form-grid form-grid-two">
+            {userRoleMasterFormFields.map((field) => (
               <FormField
                 key={field.name}
                 field={field}
@@ -73,4 +69,4 @@ function ConfigurableModuleFlyout({
   );
 }
 
-export default ConfigurableModuleFlyout;
+export default UserRoleForm;
