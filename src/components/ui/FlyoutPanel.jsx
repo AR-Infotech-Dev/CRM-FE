@@ -9,7 +9,7 @@ function FlyoutPanel({ isOpen, onClose, title, closeButton, children, footer }) 
         {closeButton}
         <div className="overlay_header">
           <div className="ws_container">
-            <h2 className="page_title">DDD{title}</h2>
+            <h2 className="page_title">{title}</h2>
           </div>
         </div>
 

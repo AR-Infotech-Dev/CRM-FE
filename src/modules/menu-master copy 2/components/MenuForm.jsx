@@ -1,17 +1,17 @@
 import { X } from "lucide-react";
-import FlyoutPanel from '../../components/ui/FlyoutPanel'
-import ActionButton from "../../components/ui/ActionButton";
-import FormField from "../../components/ui/FormField";
-import DynamicFormLayout from "../../components/ui/DynamicFormLayout";
-import Input from "../../components/form-inputs/Input";
-import Checkbox from "../../components/form-inputs/Checkbox";
-import RadioGroup from "../../components/form-inputs/RadioGroup";
-import RichTextEditor from "../../components/form-inputs/RichTextEditor";
+import FlyoutPanel from '../../../components/ui/FlyoutPanel'
+import ActionButton from "../../../components/ui/ActionButton";
+import FormField from "../../../components/ui/FormField";
+import DynamicFormLayout from "../../../components/ui/DynamicFormLayout";
+import Input from "../../../components/form-inputs/Input";
+import Checkbox from "../../../components/form-inputs/Checkbox";
+import RadioGroup from "../../../components/form-inputs/RadioGroup";
+import RichTextEditor from "../../../components/form-inputs/RichTextEditor";
 import { useState, useEffect } from "react";
-import { defualtFormData } from "./data/scheama";
-import { makeRequest } from "../../api/httpClient";
+import { defualtFormData } from "../data/scheama";
+import { makeRequest } from "../../../api/httpClient";
 import { toast } from 'react-toastify';
-import Spinner from "../../components/ui/Spinner";
+import Spinner from "../../../components/ui/Spinner";
 
 
 const layout = [

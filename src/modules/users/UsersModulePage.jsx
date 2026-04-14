@@ -1,10 +1,8 @@
+import { toast } from "react-toastify";
 import { useEffect, useMemo, useState } from "react";
-import DynamicFilter from "../../components/DynamicFilter";
-import ResizableTable from "../../components/table/ResizableTable";
 import { makeRequest } from "../../api/httpClient";
 import { useModuleFilters } from "../../store/hooks";
-import { paginateRows } from "../../utils/pagination";
-import { defaultSortConfig, getNextSortConfig, sortRows } from "../../utils/sorting";
+import { defaultSortConfig, getNextSortConfig } from "../../utils/sorting";
 import {
   buildFilterFieldsFromStructure,
   buildTableColumnsFromStructure,
@@ -12,96 +10,198 @@ import {
 import ModuleControls from "../shared/ModuleControls";
 import ModulePageLayout from "../shared/ModulePageLayout";
 import ModulePagination from "../shared/ModulePagination";
-import UserFlyout from "./components/UserFlyout";
-import { usersColumns, usersRows } from "./data/usersModuleData";
+import DynamicFilter from "../../components/DynamicFilter";
+import UserForm from "./components/UserForm";
+import ResizableTable from "../../components/table/ResizableTable";
+import { usersFallbackColumns, usersModuleSchema } from "./data/module.schema";
 
-const userFilterFields = [
-  { label: "User ID", value: "userId", type: "number" },
-  { label: "User Name", value: "name", type: "text" },
-  { label: "Email", value: "email", type: "text" },
-  { label: "Role", value: "role", type: "text" },
-  { label: "Phone", value: "phone", type: "text" },
-  { label: "Department", value: "department", type: "text" },
-  { label: "Status", value: "status", type: "text" },
-];
+async function getDefinitions(menuID) {
+  const primaryResponse = await makeRequest(usersModuleSchema.api.definitions, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: {
+      [usersModuleSchema.definitionRequest.menuIDField]: menuID,
+    },
+  });
 
-function UsersModulePage() {
+  console.log('primaryResponse : ',primaryResponse);
+  
+  if (primaryResponse.flag == 'S') {
+    return primaryResponse;
+  }
+}
+
+function UsersModulePage({ menuID }) {
+  const resolvedMenuID = menuID || usersModuleSchema.menuID || null;
+  const [fields, setFields] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [pagination, setPagination] = useState({});
   const [page, setPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState(defaultSortConfig);
-  const [structureFields, setStructureFields] = useState([]);
-  const { filteredRows, setSearchText, setFilters, clearFilters } = useModuleFilters(
-    "users",
-    usersRows
-  );
+  const [userList, setUserList] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedRowIds, setSelectedRowIds] = useState([]);
+  const [deleting, setDeleting] = useState(false);
+  const {
+    filterState,
+    setSearchText,
+    applyFilterPayload,
+    setSort,
+    clearFilters,
+  } = useModuleFilters("user-master", userList);
+
+  const sortConfig = {
+    key: filterState.order_by || defaultSortConfig.key,
+    direction: String(filterState.order || defaultSortConfig.direction).toLowerCase(),
+  };
+
+  const columnOptions = {
+    skipFields: usersModuleSchema.skipFields,
+    columnMappings: usersModuleSchema.columnMappings,
+  };
+
   const resolvedColumns = useMemo(
-    () => buildTableColumnsFromStructure(structureFields, usersColumns),
-    [structureFields]
+    () => buildTableColumnsFromStructure(fields, usersFallbackColumns, columnOptions),
+    [fields]
   );
+
   const defaultVisibleColumnKeys = useMemo(
-    () => usersColumns.map((column) => column.key),
+    () => usersFallbackColumns.map((column) => column.key),
     []
   );
+
   const resolvedFilterFields = useMemo(
-    () => buildFilterFieldsFromStructure(structureFields, userFilterFields),
-    [structureFields]
+    () =>
+      buildFilterFieldsFromStructure(
+        fields,
+        usersModuleSchema.defaultColumns.map((key) => ({
+          label:
+            usersFallbackColumns.find((column) => column.key === key)?.label || key,
+          value: key,
+          type: "text",
+        })),
+        columnOptions
+      ),
+    [fields]
   );
-  const sortedRows = useMemo(
-    () => sortRows(filteredRows, sortConfig),
-    [filteredRows, sortConfig]
-  );
-  const { paginatedRows, pagination } = useMemo(
-    () => paginateRows(sortedRows, page),
-    [sortedRows, page]
-  );
+
+  const getUserList = async () => {
+    setLoading(true);
+    const res = await makeRequest(usersModuleSchema.api.list, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: {
+        status: "active",
+        page,
+        searchText: filterState.searchText,
+        filters: filterState.filters,
+        order: filterState.order,
+        order_by: filterState.order_by,
+      },
+    });
+    setLoading(false);
+
+    if (res.flag == 'S') {
+      setSelectedUser(null);
+      setUserList(res.data || []);
+      setPagination(res.pagination || {});
+      setSelectedRowIds([]);
+      return;
+    }
+
+    toast.error(res?.msg || "Error while fetching users");
+  };
+
+  const handleToggleRow = (rowId, checked) => {
+    setSelectedRowIds((current) =>
+      checked ? [...new Set([...current, rowId])] : current.filter((item) => item !== rowId)
+    );
+  };
+
+  const handleToggleAllRows = (checked) => {
+    if (!checked) {
+      setSelectedRowIds([]);
+      return;
+    }
+
+    setSelectedRowIds(userList.map((row) => row?._id ?? row?.id ?? row?.adminID).filter(Boolean));
+  };
+
+  const handleDeleteSelected = async () => {
+    if (!selectedRowIds.length) {
+      toast.error("Please select at least one user to delete.");
+      return;
+    }
+
+    setDeleting(true);
+    const res = await makeRequest(usersModuleSchema.api.delete, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: {
+        ids: selectedRowIds,
+      },
+    });
+    setDeleting(false);
+
+    if (res.success) {
+      toast.success(res?.message || "Selected users deleted successfully.");
+      await getUserList();
+      return;
+    }
+
+    toast.error(res?.msg || "Error while deleting users");
+  };
+
+  const getColumnList = async () => {
+    const res = await getDefinitions(resolvedMenuID);
+    if (res.flag =='S') {
+      setFields(res.data || []);
+      return;
+    }
+    toast.error(res?.msg || "Error while fetching model fields");
+  };
 
   useEffect(() => {
-    setPage(1);
-  }, [filteredRows.length]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [sortConfig.key, sortConfig.direction]);
-
-  useEffect(() => {
-    const getColumnList = async () => {
-      const res = await makeRequest("/system/getstructure", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: {
-          model_name: "user",
-        },
-      });
-
-      if (res.success) {
-        setStructureFields(res.data || []);
-      }
-    };
-
     getColumnList();
-  }, []);
+  }, [resolvedMenuID]);
+
+  useEffect(() => {
+    getUserList();
+  }, [page, filterState.searchText, filterState.order, filterState.order_by, JSON.stringify(filterState.filters)]);
+
+  useEffect(() => {
+    if (page !== 1) {
+      setPage(1);
+    }
+  }, [filterState.searchText, filterState.order, filterState.order_by, JSON.stringify(filterState.filters)]);
 
   return (
     <>
       <ModulePageLayout
-        title="Users"
-        description="Manage users, permissions, departments, and statuses from a single workspace."
+        title={usersModuleSchema.title}
+        description={usersModuleSchema.description}
         controls={
           <ModuleControls
+            loading={loading}
+            onRefresh={getUserList}
             onCreate={() => {
               setSelectedUser(null);
               setIsFlyoutOpen(true);
             }}
-            selectedLabel="6 Selected"
-            resultsLabel="86 Results"
-            createLabel="Add New"
+            onDeleteSelected={handleDeleteSelected}
+            showDelete={selectedRowIds.length !== 0}
+            deleteDisabled={deleting || loading || selectedRowIds.length === 0}
+            deleteLabel={`Delete Selected${selectedRowIds.length ? ` (${selectedRowIds.length})` : ""}`}
+            deleting={deleting}
             filter={
               <DynamicFilter
                 fields={resolvedFilterFields}
-                savedFilters={[]}
+                savedFilters={usersModuleSchema.savedFilters}
                 onSearch={setSearchText}
-                onApplyFilters={setFilters}
+                onApplyFilters={applyFilterPayload}
+                onSaveFilter={() => {}}
+                onDeleteFilter={() => {}}
+                onSelectSavedFilter={() => {}}
                 onClearFilters={clearFilters}
               />
             }
@@ -109,25 +209,38 @@ function UsersModulePage() {
         }
         table={
           <ResizableTable
+            loading={loading}
             columns={resolvedColumns}
-            rows={paginatedRows}
+            rows={userList}
             storageKey="users-module-column-widths"
             defaultVisibleColumnKeys={defaultVisibleColumnKeys}
             sortConfig={sortConfig}
-            onSortChange={(columnKey) => setSortConfig((current) => getNextSortConfig(current, columnKey))}
+            onSortChange={(columnKey) => {
+              const nextSort = getNextSortConfig(sortConfig, columnKey);
+              if (page !== 1) {
+                setPage(1);
+              }
+              setSort({
+                order_by: nextSort.key,
+                order: nextSort.direction.toUpperCase(),
+              });
+            }}
             editRow={(user) => {
               setSelectedUser(user);
               setIsFlyoutOpen(true);
             }}
+            selectedRowIds={selectedRowIds}
+            onToggleRow={handleToggleRow}
+            onToggleAllRows={handleToggleAllRows}
           />
         }
         footer={<ModulePagination pagination={pagination} onPageChange={setPage} />}
       />
-      <UserFlyout
+      <UserForm
         isOpen={isFlyoutOpen}
         onClose={() => setIsFlyoutOpen(false)}
-        title={selectedUser ? "Edit User" : "Create User"}
         selectedUser={selectedUser}
+        onAfterSave={getUserList}
       />
     </>
   );

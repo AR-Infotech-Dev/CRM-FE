@@ -12,12 +12,9 @@ function MainRoutes() {
     <Routes>
       <Route path="/" element={<Navigate to="/users" replace />} />
       {getAuthRoutes()}
-      <Route path="/usersList" element={<Navigate to="/users" replace />} />
-      <Route path="/roleList" element={<Navigate to="/user-roles" replace />} />
-      <Route path="/menuList" element={<Navigate to="/menus" replace />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route path="/users" element={<UsersModulePage />} />
+          <Route path="/users" element={<UsersModulePage menuID={20} />} />
           <Route path="/user-roles" element={<UserRoleMasterModulePage />} />
           <Route path="/access-control" element={<AccessControlModulePage />} />
           <Route path="/menus" element={<MenuMasterModulePage />} />

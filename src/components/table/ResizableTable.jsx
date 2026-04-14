@@ -64,30 +64,30 @@ function renderCell(column, row, index, selectionProps = {}) {
     return (
       <div className="person-cell">
         <span className={`person-avatar avatar-${index % 6}`}>{String(value || "?").charAt(0)}</span>
-        <span>{value}</span>
+        <span className="text-overflow">{value}</span>
       </div>
     );
   }
 
   if (column.cellType === "clip") {
-    return <div className="table-text-clip">{value}</div>;
+    return <div className="text-overflow table-text-clip">{value}</div>;
   }
 
   if (column.cellType === "tag") {
-    return <span className="tag lilac">{value}</span>;
+    return <span className="text-overflow tag lilac">{value}</span>;
   }
 
   if (column.cellType === "dotText") {
     return (
       <div className="company-cell">
         <span className={`company-dot user-department-dot dept-${index % 5}`} />
-        <span>{value}</span>
+        <span className="text-overflow">{value}</span>
       </div>
     );
   }
 
   if (column.cellType === "status") {
-    return <span className={`status-pill ${getStatusClass(value)}`}>{value}</span>;
+    return <span className={`text-overflow status-pill ${getStatusClass(value)}`}>{value}</span>;
   }
 
   return value;

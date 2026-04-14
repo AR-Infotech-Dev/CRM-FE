@@ -2,7 +2,7 @@ import ModuleControls from "../shared/ModuleControls";
 import ModulePageLayout from "../shared/ModulePageLayout";
 import ModulePagination from "../shared/ModulePagination";
 import { toast } from 'react-toastify';
-import MenuForm from './components/MenuForm';
+import MenuForm from './MenuForm';
 import {
   menuMasterColumns,
   menuMasterFormFields,
