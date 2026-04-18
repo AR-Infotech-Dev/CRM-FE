@@ -1,14 +1,16 @@
 import { useRef } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import DefaultLabel from "./DefaultLabel";
+import ValidationError from "./ValidationError";
 
-const RichTextEditor = ({ name, label, value, onChange, type = 'text', placeholder, className = '', modules }) => {
+const RichTextEditor = ({ field, value, onChange, className = '', modules, error }) => {
   const quillRef = useRef(null);
   const handleEditorChange = (content) => {
     // 👇 simulate normal input event
     onChange({
       target: {
-        name,
+        name: field.name,
         value: content,
       },
     });
@@ -16,17 +18,19 @@ const RichTextEditor = ({ name, label, value, onChange, type = 'text', placehold
 
   return (
     <div className="bg-white p-2" >
-      <label className="text-xs text-gray-500">{label}</label>
-
+      <DefaultLabel label={field.label} required={field.required} />
       <ReactQuill
         ref={quillRef}
-        name={name}
+        name={field.name}
         theme="snow"
         value={value}
         onChange={handleEditorChange}
         className={`mt-2 ${className}`}
         modules={modules}
       />
+      {error && (
+        <ValidationError error={error} />
+      )}
     </div>
   );
 };

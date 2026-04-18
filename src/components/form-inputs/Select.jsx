@@ -1,16 +1,14 @@
 import React from 'react';
+import DefaultLabel from './DefaultLabel';
 
-const Select = ({ label, value, onChange, options = [], className = '', ...rest }) => (
+
+const Select = ({ field, value, onChange, className = '', ...rest }) => (
   <div className="flex flex-col gap-1 p-2">
-    {label && <label className="text-xs text-gray-500">{label}</label>}
-    <select
-      value={value}
-      onChange={onChange}
-      className={`border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`}
-      {...rest}
-    >
-      {options.map((opt) => (
-        <option key={opt.key} value={opt.key}>
+    <DefaultLabel label={field.label} required={field.required} />
+    <select name={field.name} value={value} onChange={onChange} className={`border border-gray-50 text-gray-600 bg-gray-100 px-3 py-1.5 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-100 ${className}`}{...rest}>
+      <option value="">{field.placeholder || `Select ${field.label}`}</option>
+      {field.options.map((opt) => (
+        <option key={opt.label} value={opt.value}>
           {opt.value}
         </option>
       ))}

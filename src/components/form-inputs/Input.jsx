@@ -1,17 +1,25 @@
 import React from 'react';
+import DefaultLabel from './DefaultLabel';
+import ValidationError from './ValidationError';
 
-const Input = ({ label,required, value, onChange, type = 'text', placeholder, className = '', ...rest }) => (
-  <div className="flex flex-col gap-1 p-1">
-    {label && <label className="text-xs text-gray-500">{label} {required && <span className='text-red-500'>*</span> }</label>}
+
+const Input = ({ field, value, onChange, placeholder, className = '',disabled, error, ...rest }) => (
+  
+  <div className="flex min-w-0 flex-col gap-1 p-1">
+    <DefaultLabel label={field.label} required={field.required} />
     <input
-      type={type}
-      value={value ?? ""}   // ✅ FIX HERE
+      type={field.type}
+      name={field.name || ''}
+      value={value ?? ""}
       onChange={onChange}
-      placeholder={placeholder}
-      required={required}
-      className={`border border-gray-50 text-gray-600 bg-gray-100 px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-100 ${className}`}
-      {...rest}
+      placeholder={field.placeholder}
+      required={field.required}
+      className={`border ${!error ? "border-gray-50 text-gray-600" : 'border-red-400 text-red-500' } bg-gray-100 px-3 py-1.5 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-100 ${className}`}
+      disabled={field.disabled || false}
     />
+    {error && (
+       <ValidationError error={error}/>
+     )}
   </div>
 );
 

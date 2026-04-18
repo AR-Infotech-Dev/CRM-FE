@@ -1,8 +1,10 @@
+import { config } from "dotenv";
 import { buildFallbackColumnsFromKeys } from "../../../utils/moduleStructure";
+import { z } from "zod";
 
 const FIXED_TABLE_COLUMNS = [
   { key: "select", className: "check-col", checkbox: true, width: 42, minWidth: 42, resizable: false },
-  { key: "favorite", className: "icon-col", width: 42, minWidth: 42, resizable: false },
+  // { key: "favorite", className: "icon-col", width: 42, minWidth: 42, resizable: false },
 ];
 
 export const usersModuleSchema = {
@@ -11,11 +13,12 @@ export const usersModuleSchema = {
   title: "Users",
   description: "Manage users, roles, company assignment, and approval access from one place.",
   menuID: 20,
+  primaryKey: 'adminID',
   api: {
     list: "/users",
     delete: "/users/delete",
     create: "/users/create",
-    edit: "/users/edit",
+    edit: "/users",
     definitions: "/system/getDefinations",
     definitionsFallback: "/system/getstructure",
   },
@@ -49,25 +52,7 @@ export const usersModuleSchema = {
     },
   ],
   defaultColumns: ["name", "userName", "email", "contactNo", "roleID", "status"],
-  skipFields: [
-    "user_setting",
-    "gfcmToken",
-    "otp",
-    "country_code",
-    "otp_exp_time",
-    "g_cal_token",
-    "one_drive_access_token",
-    "is_google_sync",
-    "is_one_drive_sync",
-    "ftoken",
-    "isVerified",
-    "photo",
-    "adminID",
-    "password",
-    "latitude",
-    "longitude",
-    "roleOfUser",
-  ],
+  skipFields: ["user_setting", "gfcmToken", "otp", "country_code", "otp_exp_time", "g_cal_token", "one_drive_access_token", "is_google_sync", "is_one_drive_sync", "ftoken", "isVerified", "photo", "adminID", "latitude", "longitude", "roleOfUser"],
   columnMappings: [
     { is_sys_user: "System User" },
     { isEmailSend: "Verification Email Sent" },
@@ -111,10 +96,14 @@ export const usersModuleSchema = {
         columns: 3,
         fields: [
           { name: "name", label: "Name", type: "text", required: true, placeholder: "Enter name" },
-          { name: "userName", label: "User Name", type: "text", required: true, placeholder: "Enter user name" },
           { name: "email", label: "Email", type: "email", required: true, placeholder: "Enter email" },
-          { name: "dateOfBirth", label: "Date Of Birth", type: "date" },
-          { name: "contactNo", label: "Mobile Number", type: "text", required: true, placeholder: "Enter mobile number" },
+          { name: "dateOfBirth", label: "Date of birth", type: "date", required: true, placeholder: "Birth date" },
+        ]
+      },
+      {
+        columns: 3,
+        fields: [
+          { name: "userName", label: "User Name", type: "text", required: true, disabled: true, placeholder: "Enter user name" },
           { name: "whatsappNo", label: "Whatsapp Number", type: "text", placeholder: "Enter whatsapp number" },
           {
             name: "time_zone",
@@ -126,78 +115,60 @@ export const usersModuleSchema = {
               { value: "UTC+00:00", label: "(UTC+00:00) Greenwich Mean Time (GMT)" },
             ],
           },
-          {
-            name: "default_company",
-            label: "Assign Company/Branch",
-            type: "select",
-            required: true,
-            joinedField: "default_company",
-            placeholder: "Select Company/Branch",
-          },
-          {
-            name: "roleID",
-            label: "User Role",
-            type: "select",
-            required: true,
-            joinedField: "roleID",
-            placeholder: "Select user role",
-          },
-          {
-            name: "is_approver",
-            label: "Approval Privileges",
-            type: "radio",
-            options: [
-              { value: "yes", label: "Yes" },
-              { value: "no", label: "No" },
-            ],
-          },
-          { name: "google_location", label: "Google Location", type: "text", placeholder: "Enter google location" },
-          {
-            name: "status",
-            label: "Status",
-            type: "radio",
-            required: true,
-            options: [
-              { value: "active", label: "Active" },
-              { value: "inactive", label: "Inactive" },
-            ],
-          },
+          // {
+          //   name: "default_company",
+          //   label: "Assign Company/Branch",
+          //   type: "select",
+          //   required: true,
+          //   joinedField: "default_company",
+          //   placeholder: "Select Company/Branch",
+          // },
+          // {
+          //   name: "roleID",
+          //   label: "User Role",
+          //   type: "select",
+          //   required: true,
+          //   joinedField: "roleID",
+          //   placeholder: "Select user role",
+          // },
         ],
       },
       {
         columns: 3,
         fields: [
-          { name: "name", label: "Name", type: "text", required: true, placeholder: "Enter name" },
-          { name: "userName", label: "User Name", type: "text", required: true, placeholder: "Enter user name" },
-          { name: "email", label: "Email", type: "email", required: true, placeholder: "Enter email" },
-          { name: "dateOfBirth", label: "Date Of Birth", type: "date" },
-          { name: "contactNo", label: "Mobile Number", type: "text", required: true, placeholder: "Enter mobile number" },
-          { name: "whatsappNo", label: "Whatsapp Number", type: "text", placeholder: "Enter whatsapp number" },
-          {
-            name: "time_zone",
-            label: "Time Zone",
-            type: "select",
-            options: [
-              { value: "Asia/Kolkata", label: "(UTC+05:30) India Standard Time (IST)" },
-              { value: "UTC+04:00", label: "(UTC+04:00) Gulf Standard Time (GST)" },
-              { value: "UTC+00:00", label: "(UTC+00:00) Greenwich Mean Time (GMT)" },
-            ],
-          },
-          {
-            name: "default_company",
-            label: "Assign Company/Branch",
-            type: "select",
-            required: true,
-            joinedField: "default_company",
-            placeholder: "Select Company/Branch",
-          },
           {
             name: "roleID",
             label: "User Role",
-            type: "select",
+            type: "smartSelect",
             required: true,
-            joinedField: "roleID",
-            placeholder: "Select user role",
+            id: "roleID",
+            config: {
+              apiUrl: "/system/searchList",
+              tableName: "user_role_master",
+              selectFields: "roleName,roleID",
+              searchField: "roleName",
+              labelKey: "roleName",
+              valueKey: "roleID",
+              placeholder: "Select Role",
+              multi: false
+            }
+          },
+          {
+            name: "company_id",
+            label: "Company",
+            type: "smartSelect",
+            required: true,
+            id: "company_id",
+            config: {
+              apiUrl: "/system/searchList",
+              tableName: "info_settings",
+              selectFields: "companyName,infoID",
+              searchField: "companyName",
+              labelKey: "companyName",
+              valueKey: "infoID",
+              placeholder: "Select Company",
+              multi: false
+            }
           },
           {
             name: "is_approver",
@@ -208,6 +179,11 @@ export const usersModuleSchema = {
               { value: "no", label: "No" },
             ],
           },
+        ]
+      },
+      {
+        columns: 3,
+        fields: [
           { name: "google_location", label: "Google Location", type: "text", placeholder: "Enter google location" },
           {
             name: "status",
@@ -219,16 +195,78 @@ export const usersModuleSchema = {
               { value: "inactive", label: "Inactive" },
             ],
           },
+          // {
+          //   name: "roleID",
+          //   label: "User Role",
+          //   type: "smartSelect",
+          //   required: true,
+          //   id: "roleID",
+          //   config: {
+          //     type: 'roles',
+          //     valueKey: 'role_id',
+          //     source: 'user_role_master',
+          //     statusCheck: true,
+          //     getLabel: (item) => `${item.roleName}`,
+          //     getValue: (item) => item.roleID,
+          //     placeholder: 'Select Role',
+          //     list: "roleName,roleID",
+          //     allowAddNew: false, preload: false, cache: false, showRecent: false
+          //   },
+          //   // <SmartSelectInput
+          //   //     id="customer" label="" value={defaultFormData?.customer_id}
+          //   //     onSelect={(data) => {
+          //   //       handleInputChange("customer_id", data)
+          //   //     }}
+          //   //     onObjectSelect={() => { }}
+          //   // config={{
+          //   //   type: 'customer', valueKey: 'customer_id', source: 'customer', statusCheck: true,
+          //   //   getLabel: (item) => `${item.name}`,
+          //   //   getValue: (item) => item.customer_id,
+          //   //   placeholder: 'Select Customer',
+          //   //   list: "name,customer_id",
+          //   //   allowAddNew: true, preload: true, cache: true, showRecent: true
+          //   // }}
+          //   //   />
+          // },
+
         ],
       },
+
       {
         columns: 1,
         fields: [
-          { name: "address", label: "Address", type: "textarea", placeholder: "Enter address", rows: 4 },
+          { name: "address", label: "Address", type: "editor", placeholder: "Enter address", rows: 4 },
         ],
       },
     ],
   },
+  validationSchema: z.object({
+    name: z.string().min(1, "Name is required"),
+
+    userName: z.string()
+      .min(3, "Username must be at least 3 characters"),
+
+    email: z.string()
+      .email("Invalid email address"),
+
+    dateOfBirth: z.coerce.date()
+      .min(new Date("1900-01-01"), { message: "Too old" })
+      .max(new Date(), { message: "Birth date cannot be in the future" }),
+
+    // contactNo: z.string()
+    //   .min(10, "Mobile number must be 10 digits")
+    //   .max(10, "Mobile number must be 10 digits"),
+
+    roleID: z.any().refine((value) => value !== "" && value !== null && value !== undefined, {
+      message: "Role is required",
+    }),
+
+    // password: z.string()
+    //   .min(6, "Password minimum 6 characters")
+    //   .optional(),
+
+    status: z.string()
+  })
 };
 
 export const usersFallbackColumns = [

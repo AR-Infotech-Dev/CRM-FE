@@ -1,3 +1,5 @@
+import { makeRequest } from "../api/httpClient";
+
 function titleCaseFromKey(key = "") {
   return String(key)
     .replace(/_/g, " ")
@@ -151,4 +153,18 @@ export function buildFilterFieldsFromStructure(fields = [], fallbackFields = [],
     .filter(Boolean);
 
   return normalizedFields.length ? normalizedFields : fallbackFields;
+}
+
+export async function getDefinitions(menuID) {
+  const primaryResponse = await makeRequest('/system/getDefinations', {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: {
+      "menuID": menuID,
+    },
+  });
+
+  if (primaryResponse.success) {
+    return primaryResponse;
+  }
 }

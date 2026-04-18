@@ -3,7 +3,7 @@ import TableHeader from "./TableHeader";
 import { Edit, Star } from "lucide-react";
 import TableSkeleton from "./TableSkeleton";
 import NoTableData from "./NoTableData";
-
+import ColumnArranger from "./ColumnArranger";
 
 const statusClassMap = {
   active: "status-green",
@@ -30,7 +30,7 @@ function getStatusClass(value) {
 }
 
 function getRowIdentifier(row) {
-  return row?._id ?? row?.id ?? row?.menu_id ?? row?.roleId ?? row?.userId;
+  return row?._id ?? row?.id ?? row?.adminID ?? row?.menu_id ?? row?.roleId ?? row?.userId;
 }
 
 function renderCell(column, row, index, selectionProps = {}) {
@@ -183,6 +183,8 @@ function ResizableTable({
   const [visibleColumnKeys, setVisibleColumnKeys] = useState(() =>
     getStoredVisibleColumnKeys(storageKey) || getDefaultVisibleColumnKeys(columns, defaultVisibleColumnKeys)
   );
+  const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
+
 
   useEffect(() => {
     window.localStorage.setItem(storageKey, JSON.stringify(columnWidths));
@@ -214,12 +216,12 @@ function ResizableTable({
   const resolvedColumns = useMemo(
     () =>
       visibleColumnKeys
-      .map((key) => columns.find((column) => column.key === key))
-      .filter(Boolean)
-      .map((column) => ({
-        ...column,
-        currentWidth: Math.max(column.minWidth || 60, columnWidths[column.key] || column.width || 120),
-      })),
+        .map((key) => columns.find((column) => column.key === key))
+        .filter(Boolean)
+        .map((column) => ({
+          ...column,
+          currentWidth: Math.max(column.minWidth || 60, columnWidths[column.key] || column.width || 120),
+        })),
     [columnWidths, columns, visibleColumnKeys]
   );
 
@@ -289,31 +291,36 @@ function ResizableTable({
 
   return (
     <div className="table-card">
+      <ColumnArranger
+        setIsColumnMenuOpen={setIsColumnMenuOpen}
+        isColumnMenuOpen={isColumnMenuOpen}
+        hiddenColumns={hiddenColumns}
+        removableColumns={removableColumns}
+        onShowColumn={handleShowColumn}
+        onHideColumn={handleHideColumn}
+        onMoveColumn={handleMoveColumn}
+      />
       <div className="table-scroll-x">
         <table style={{ width: tableWidth, minWidth: tableWidth }}>
           <TableHeader
+            setIsColumnMenuOpen={setIsColumnMenuOpen}
             columns={resolvedColumns}
             onResize={handleResize}
             sortConfig={sortConfig}
             onSortChange={onSortChange}
             allRowsSelected={allRowsSelected}
             onToggleAllRows={onToggleAllRows}
-            hiddenColumns={hiddenColumns}
-            removableColumns={removableColumns}
-            onShowColumn={handleShowColumn}
-            onHideColumn={handleHideColumn}
-            onMoveColumn={handleMoveColumn}
           />
-          <tbody> 
+          <tbody>
             {loading && <TableSkeleton resolvedColumns={resolvedColumns} rows={10} columns={10} />}
             {!loading && rows &&
               rows.map((row, index) =>
                 typeof renderRow === "function"
                   ? renderRow(row, index, resolvedColumns)
                   : renderConfigRow(row, index, resolvedColumns, editRow, {
-                      selectedRowIds,
-                      onToggleRow,
-                    })
+                    selectedRowIds,
+                    onToggleRow,
+                  })
               )
             }
             {!loading && (!rows || rows.length === 0) &&

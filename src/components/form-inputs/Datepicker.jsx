@@ -3,8 +3,11 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
+import ValidationError from './ValidationError';
 
-const DatePickerInput = React.forwardRef(({ value, onClick }, ref) => (
+
+
+const DatePickerInput = React.forwardRef(({ value, onClick },error, ref) => (
   <button
     onClick={onClick}
     ref={ref}
@@ -37,6 +40,9 @@ const CustomDatePicker = ({
         popperPlacement="bottom-start"
         className="w-full"
       />
+      {error && (
+        <ValidationError error={error} />
+      )}
     </div>
   );
 };

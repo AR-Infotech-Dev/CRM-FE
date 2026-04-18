@@ -6,6 +6,7 @@ import { defaultSortConfig, getNextSortConfig } from "../../utils/sorting";
 import {
   buildFilterFieldsFromStructure,
   buildTableColumnsFromStructure,
+  getDefinitions
 } from "../../utils/moduleStructure";
 import ModuleControls from "../shared/ModuleControls";
 import ModulePageLayout from "../shared/ModulePageLayout";
@@ -14,22 +15,6 @@ import DynamicFilter from "../../components/DynamicFilter";
 import UserForm from "./components/UserForm";
 import ResizableTable from "../../components/table/ResizableTable";
 import { usersFallbackColumns, usersModuleSchema } from "./data/module.schema";
-
-async function getDefinitions(menuID) {
-  const primaryResponse = await makeRequest(usersModuleSchema.api.definitions, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: {
-      [usersModuleSchema.definitionRequest.menuIDField]: menuID,
-    },
-  });
-
-  console.log('primaryResponse : ',primaryResponse);
-  
-  if (primaryResponse.flag == 'S') {
-    return primaryResponse;
-  }
-}
 
 function UsersModulePage({ menuID }) {
   const resolvedMenuID = menuID || usersModuleSchema.menuID || null;
@@ -101,7 +86,7 @@ function UsersModulePage({ menuID }) {
     });
     setLoading(false);
 
-    if (res.flag == 'S') {
+    if (res.success) {
       setSelectedUser(null);
       setUserList(res.data || []);
       setPagination(res.pagination || {});
@@ -109,7 +94,7 @@ function UsersModulePage({ menuID }) {
       return;
     }
 
-    toast.error(res?.msg || "Error while fetching users");
+    toast.error(res?.message || "Error while fetching users");
   };
 
   const handleToggleRow = (rowId, checked) => {
@@ -138,6 +123,7 @@ function UsersModulePage({ menuID }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: {
+        action:'delete',
         ids: selectedRowIds,
       },
     });
@@ -149,20 +135,22 @@ function UsersModulePage({ menuID }) {
       return;
     }
 
-    toast.error(res?.msg || "Error while deleting users");
+    toast.error(res?.message || "Error while deleting users");
   };
 
   const getColumnList = async () => {
     const res = await getDefinitions(resolvedMenuID);
-    if (res.flag =='S') {
+    if (res.success) {
       setFields(res.data || []);
       return;
     }
-    toast.error(res?.msg || "Error while fetching model fields");
+    toast.error(res?.message || "Error while fetching model fields");
   };
 
   useEffect(() => {
     getColumnList();
+    console.log('here : ');
+    console.log(fields);
   }, [resolvedMenuID]);
 
   useEffect(() => {
@@ -199,9 +187,9 @@ function UsersModulePage({ menuID }) {
                 savedFilters={usersModuleSchema.savedFilters}
                 onSearch={setSearchText}
                 onApplyFilters={applyFilterPayload}
-                onSaveFilter={() => {}}
-                onDeleteFilter={() => {}}
-                onSelectSavedFilter={() => {}}
+                onSaveFilter={() => { }}
+                onDeleteFilter={() => { }}
+                onSelectSavedFilter={() => { }}
                 onClearFilters={clearFilters}
               />
             }

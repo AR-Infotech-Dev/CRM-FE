@@ -1,18 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
 import { toast } from "react-toastify";
-import FlyoutPanel from "../../../components/ui/FlyoutPanel";
-import ActionButton from "../../../components/ui/ActionButton";
-import Input from "../../../components/form-inputs/Input";
-import Spinner from "../../../components/ui/Spinner";
 import { makeRequest } from "../../../api/httpClient";
 import { usersModuleSchema } from "../data/module.schema";
-
-const SECTION_COLUMN_CLASS = {
-  1: "grid grid-cols-1 gap-4",
-  2: "grid grid-cols-1 gap-4 md:grid-cols-2",
-  3: "grid grid-cols-1 gap-4 md:grid-cols-3",
-};
+import FlyoutPanel from "../../../components/ui/FlyoutPanel";
+import ActionButton from "../../../components/ui/ActionButton";
+import Spinner from "../../../components/ui/Spinner";
+import DynamicModuleForm from "../../../components/ui/DynamicModuleForm";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 function buildJoinedOptions(joinConfig, selectedValue, selectedLabel) {
   const configuredOptions = (joinConfig?.options || []).map((option) => ({
@@ -50,7 +46,7 @@ function getSelectedLabel(field, value, selectedUser) {
 }
 
 function getUserIdentifier(user = {}) {
-  return user?._id || user?.adminID || user?.id || null;
+  return user?.adminID;
 }
 
 function normalizeUserData(selectedUser = {}) {
@@ -60,7 +56,7 @@ function normalizeUserData(selectedUser = {}) {
     userName: selectedUser?.userName || selectedUser?.user_name || "",
     contactNo: selectedUser?.contactNo || selectedUser?.contactno || "",
     whatsappNo: selectedUser?.whatsappNo || selectedUser?.whatsappno || "",
-    dateOfBirth: selectedUser?.dateOfBirth || selectedUser?.dateofbirth || "",
+    // dateOfBirth: selectedUser?.dateOfBirth || selectedUser?.dateofbirth || "",
     roleID: selectedUser?.roleID || selectedUser?.roleid || selectedUser?.roleId || "",
     default_company: selectedUser?.default_company || selectedUser?.company_id || "",
     is_approver: selectedUser?.is_approver || "no",
@@ -68,24 +64,61 @@ function normalizeUserData(selectedUser = {}) {
     google_location: selectedUser?.google_location || "",
     address: selectedUser?.address || "",
     status: selectedUser?.status || "active",
+    dateOfBirth: selectedUser?.dateOfBirth
+      ? new Date(selectedUser.dateOfBirth).toISOString().split("T")[0]
+      : "",
   };
+}
+function generateUsernamePassword() {
+
 }
 
 function UserForm({ isOpen, onClose, selectedUser, onAfterSave }) {
   const [loading, setLoading] = useState(false);
+  const [fetchingUser, setFetchingUser] = useState(false);
   const [formData, setFormData] = useState(usersModuleSchema.form.initialValues);
-
+  const [errors, setErrors] = useState({});
   const mode = selectedUser ? "edit" : "create";
   const userID = getUserIdentifier(selectedUser);
 
   useEffect(() => {
-    if (selectedUser) {
-      setFormData(normalizeUserData(selectedUser));
+    const fetchUserDetails = async () => {
+      if (!isOpen || !userID) {
+        return;
+      }
+
+      try {
+        setFetchingUser(true);
+
+        const res = await makeRequest(
+          `${usersModuleSchema.api.edit}/${userID}`,
+          {
+            method: "GET",
+          }
+        );
+
+        const userData = res?.data;
+
+        setFormData(normalizeUserData(userData));
+
+      } catch (error) {
+        toast.error("Unable to fetch user details");
+        setFormData(normalizeUserData(selectedUser));
+      } finally {
+        setFetchingUser(false);
+      }
+    };
+
+    // EDIT MODE
+    if (selectedUser && isOpen) {
+      fetchUserDetails();
       return;
     }
 
+    // CREATE MODE
     setFormData(usersModuleSchema.form.initialValues);
-  }, [selectedUser, isOpen]);
+
+  }, [selectedUser, isOpen, userID]);
 
   const joinedFieldOptions = useMemo(
     () =>
@@ -100,146 +133,157 @@ function UserForm({ isOpen, onClose, selectedUser, onAfterSave }) {
       }, {}),
     [formData, selectedUser]
   );
+  const selectOptionsMap = useMemo(
+    () =>
+      usersModuleSchema.form.sections.reduce((accumulator, section) => {
+        section.fields.forEach((field) => {
+          if (field.type === "select") {
+            accumulator[field.name] = field.joinedField
+              ? joinedFieldOptions[field.joinedField] || []
+              : field.options || [];
+          }
+        });
+        return accumulator;
+      }, {}),
+    [joinedFieldOptions]
+  );
 
   if (!isOpen) {
     return null;
   }
-
+  const handleClose = () => {
+    setFormData(usersModuleSchema.form.initialValues);
+    setErrors({});
+    onClose();
+  }
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormData((current) => ({
-      ...current,
+    const updatedData = {
+      ...formData,
       [name]: value,
+    };
+    setFormData(updatedData);
+    if ((name === "name" || name === "dateOfBirth") && updatedData.name && updatedData.dateOfBirth) {
+      generateCredentials(updatedData.name, updatedData.dateOfBirth);
+    }
+  };
+
+  const generateCredentials = (name, birthDate) => {
+    const cleanName = name.trim().toLowerCase().replace(/\s+/g, "");
+
+    const dob = new Date(birthDate);
+    const day = String(dob.getDate()).padStart(2, "0");
+    const month = String(dob.getMonth() + 1).padStart(2, "0");
+    const year = dob.getFullYear();
+
+    const username = cleanName.split("_")[0] + "@" + year;
+    // const username = cleanName.substring(0, 6) + year;
+
+    const password =
+      cleanName.charAt(0).toUpperCase() +
+      day +
+      month +
+      "@" +
+      String(year).slice(-2);
+
+    setFormData((prev) => ({
+      ...prev,
+      userName: username,
+      password: password,
     }));
   };
 
   const handleSave = async () => {
-    setLoading(true);
+    const result = usersModuleSchema.validationSchema.safeParse(formData);
+    console.log(result,' sas');
+    
 
-    const saveUrl =
-      mode === "create"
-        ? usersModuleSchema.api.create
-        : `${usersModuleSchema.api.edit}/${userID}`;
+    if (result.success == false) {
+      const newErrors = {};
 
-    const res = await makeRequest(saveUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: formData,
-    });
+      result.error.issues.forEach((item) => {
+        newErrors[item.path[0]] = item.message;
+      });
 
-    setLoading(false);
-
-    if (res.success) {
-      toast.success(res?.message || `User ${mode === "create" ? "created" : "updated"} successfully.`);
-      setFormData(usersModuleSchema.form.initialValues);
-      onClose();
-      onAfterSave?.();
+      setErrors(newErrors);
       return;
     }
 
-    toast.error(res?.msg || `Error while ${mode === "create" ? "creating" : "updating"} user`);
+    try {
+      setErrors({});
+      setLoading(true);
+
+      const saveUrl =
+        mode === "create"
+          ? usersModuleSchema.api.create
+          : `${usersModuleSchema.api.edit}/${userID}`;
+
+      const method = mode === "create" ? "PUT" : "POST";
+
+      const res = await makeRequest(saveUrl, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData), // ✅ FIX
+      });
+
+      if (res.success) {
+        toast.success(
+          res?.msg ||
+          `User ${mode === "create" ? "created" : "updated"} successfully`
+        );
+
+        setFormData(usersModuleSchema.form.initialValues);
+        onClose();
+        onAfterSave?.();
+        return;
+      }
+
+      toast.error(res?.msg || "Something went wrong");
+    } catch (error) {
+      toast.error(error.message || "Server error");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const renderField = (field) => {
-    const value = formData[field.name] ?? "";
-    if (field.type === "radio") {
-      return (
-        <div className="flex flex-col gap-2 p-1">
-          <label className="text-xs text-gray-500">
-            {field.label}
-            {field.required ? <span className="text-red-500"> *</span> : null}
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {field.options.map((option) => {
-              const isActive = value === option.value;
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() =>
-                    handleChange({
-                      target: { name: field.name, value: option.value },
-                    })
-                  }
-                  className={`rounded-md border px-4 py-1.5 text-sm ${
-                    isActive
-                      ? "border-blue-600 bg-blue-600 text-white"
-                      : "border-slate-200 bg-slate-100 text-slate-600"
-                  }`}
-                >
-                  {option.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      );
-    }
+  // const handleSave = async () => {
+  //   const result = usersModuleSchema.validationSchema.safeParse(formData);
+  //   if (!result.success) {
+  //     const newErrors = {};
+  //     result.error.issues.forEach((item) => {
+  //       const fieldName = item.path[0];
+  //       newErrors[fieldName] = item.message;
+  //     });
+  //     setErrors(newErrors);
+  //     return;
+  //   }
 
-    if (field.type === "select") {
-      const selectOptions = field.joinedField
-        ? joinedFieldOptions[field.joinedField] || []
-        : field.options || [];
-
-      return (
-        <div className="flex flex-col gap-1 p-1">
-          <label className="text-xs text-gray-500">
-            {field.label}
-            {field.required ? <span className="text-red-500"> *</span> : null}
-          </label>
-          <select
-            name={field.name}
-            value={value}
-            onChange={handleChange}
-            className="rounded border border-gray-50 bg-gray-100 px-3 py-2 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-100"
-          >
-            <option value="">{field.placeholder || `Select ${field.label}`}</option>
-            {selectOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      );
-    }
-
-    if (field.type === "textarea") {
-      return (
-        <div className="flex flex-col gap-1 p-1">
-          <label className="text-xs text-gray-500">
-            {field.label}
-            {field.required ? <span className="text-red-500"> *</span> : null}
-          </label>
-          <textarea
-            name={field.name}
-            rows={field.rows || 4}
-            value={value}
-            onChange={handleChange}
-            placeholder={field.placeholder}
-            className="rounded border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-100"
-          />
-        </div>
-      );
-    }
-
-    return (
-      <Input
-        required={field.required}
-        label={field.label}
-        name={field.name}
-        type={field.type || "text"}
-        onChange={handleChange}
-        value={value}
-        placeholder={field.placeholder}
-      />
-    );
-  };
+  //   setErrors({});
+  //   setLoading(true);
+  //   const saveUrl = mode === "create" ? usersModuleSchema.api.create : `${usersModuleSchema.api.edit}/${userID}`;
+  //   const method = mode === "create" ? 'PUT' : 'POST';
+  //   const res = await makeRequest(saveUrl, {
+  //     method: method,
+  //     headers: { "Content-Type": "application/json" },
+  //     body: formData,
+  //   });
+  //   setLoading(false);
+  //   if (res.flag == 'S') {
+  //     toast.success(res?.msg || `User ${mode === "create" ? "created" : "updated"} successfully.`);
+  //     setFormData(usersModuleSchema.form.initialValues);
+  //     onClose();
+  //     onAfterSave?.();
+  //     return;
+  //   }
+  //   toast.error(res?.msg || `Error while ${mode === "create" ? "creating" : "updating"} user`);
+  // };
 
   return (
     <FlyoutPanel
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title={selectedUser ? "Edit User" : "Create User"}
       closeButton={
         <button className="flyout-close" onClick={onClose} aria-label="Close panel">
@@ -253,21 +297,24 @@ function UserForm({ isOpen, onClose, selectedUser, onAfterSave }) {
           variant="flyoutPrimary"
           onClick={handleSave}
         >
-          {loading ? <Spinner /> : null} Save
+          {loading || fetchingUser ? <Spinner /> : null} Save
         </ActionButton>
       }
     >
       <div className="flyout-form-shell">
-        <div className="ws-main-container space-y-5">
-          {usersModuleSchema.form.sections.map((section, sectionIndex) => (
-            <div key={`section-${sectionIndex}`} className={SECTION_COLUMN_CLASS[section.columns] || SECTION_COLUMN_CLASS[2]}>
-              {section.fields.map((field) => (
-                <div key={field.name} className={field.columns === 2 ? "md:col-span-2" : ""}>
-                  {renderField(field)}
-                </div>
-              ))}
+        <div className="ws-main-container">
+          {fetchingUser ? (
+            <div className="p-5 text-center">
+              <Spinner />
             </div>
-          ))}
+          ) : (
+            <DynamicModuleForm
+              sections={usersModuleSchema.form.sections}
+              values={formData}
+              onChange={handleChange}
+              errors={errors}
+            />
+          )}
         </div>
       </div>
     </FlyoutPanel>

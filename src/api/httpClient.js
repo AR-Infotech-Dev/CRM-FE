@@ -10,8 +10,6 @@ export const makeRequest = async (url, options = {}) => {
       body = null,
       params = null,
     } = options;
-    console.log('method : ', method);
-
     const config = {
       url,
       baseURL: API_BASE_URL,

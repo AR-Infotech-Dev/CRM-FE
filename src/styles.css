@@ -898,10 +898,10 @@ thead th {
 
 .table-column-picker-menu {
   position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
+  top: 25%;
+  left: 31%;
   height: 250px;
-  overflow: auto;
+  /* overflow: auto; */
   display: flex;
   width: 600px;
   padding: 10px;
@@ -909,8 +909,25 @@ thead th {
   border-radius: 12px;
   background: #ffffff;
   box-shadow: 0 18px 48px rgba(44, 25, 149, 0.14);
-  z-index: 8;
+  z-index: 5;
   justify-content: space-around;
+}
+
+.column-menu-close {
+  position: absolute;
+  top: -23px;
+  left: -2px;
+  z-index: 999;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 25px;
+  border: 1px solid #dfe3eb;
+  border-radius: 999px;
+  color: #111827;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
 }
 
 .table-column-picker-section+.table-column-picker-section {
