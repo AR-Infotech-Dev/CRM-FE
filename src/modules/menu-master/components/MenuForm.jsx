@@ -99,7 +99,7 @@ function MenuForm({ isOpen, onClose, title, selectedMenu, getMenuList }) {
             footer={
                 <>
                     <ActionButton className={`${loading && 'bg-purple-200 cursor-not-allowed'}`} disabled={loading} variant="flyoutPrimary" onClick={handleSave}>
-                        {loading && <Spinner/> } Save
+                        {loading && <Spinner />} Save
                     </ActionButton>
                 </>
             }

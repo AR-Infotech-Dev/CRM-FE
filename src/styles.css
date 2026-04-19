@@ -15,7 +15,51 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Brand Primitive Colors */
+  --brand-navy: #003B7D;
+  /* From "flowupS" text */
+  --brand-sky: #0096D6;
+  /* From "LITE" and main arrow */
+  --brand-accent: #32B5E8;
+  /* From arrow gradient accent */
+
+  /* Semantic Mappings */
+  --color-primary: var(--brand-sky);
+  --color-secondary: var(--brand-navy);
+  --color-accent: var(--brand-accent);
+
+  /* Surface & Typography */
+  --color-bg: #FFFFFF;
+  --color-text-main: var(--brand-navy);
+  --color-text-muted: #6B7280;
+  /* Neutral grey for secondary info */
+
+  /* Functional Colors (Standard) */
+  --color-success: #10B981;
+  --color-error: #EF4444;
+  --color-warning: #F59E0B;
 }
+/* --- Brand Navy Classes (#003B7D) --- */
+.text-brand-primary { color: var(--brand-navy); }
+.bg-brand-primary { background-color: var(--brand-navy); }
+.border-brand-primary { border-color: var(--brand-navy); }
+
+/* --- Brand Sky Classes (#0096D6) --- */
+.text-brand-secondary { color: var(--brand-sky); }
+.bg-brand-secondary   { background-color: var(--brand-sky); }
+.border-brand-secondary { border-color: var(--brand-sky); }
+
+/* --- Brand Accent Classes (#32B5E8) --- */
+.text-brand-ternary { color: var(--brand-accent); }
+.bg-brand-ternary   { background-color: var(--brand-accent); }
+.border-brand-ternary { border-color: var(--brand-accent); }
+
+/* --- Bonus: Gradient Matching the Logo Arrow --- */
+.bg-brand-gradient {
+  background: linear-gradient(135deg, var(--brand-sky) 0%, var(--brand-accent) 100%);
+}
+
 
 * {
   box-sizing: border-box;

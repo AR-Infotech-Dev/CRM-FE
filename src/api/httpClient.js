@@ -1,9 +1,12 @@
 import { Code } from "lucide-react";
-import { API_BASE_URL, DEFAULT_HEADERS } from "./config";
+import { API_BASE_URL, DEFAULT_HEADERS, getDefaultHeaders } from "./config";
 import axios from 'axios';
+import { clearAuthSession } from "../auth/authStorage";
+import { set } from "react-hook-form";
 
 export const makeRequest = async (url, options = {}) => {
   try {
+    const token = localStorage.getItem("_bb_key");
     const {
       method = "GET",
       headers = {},
@@ -15,13 +18,14 @@ export const makeRequest = async (url, options = {}) => {
       baseURL: API_BASE_URL,
       method,
       headers: {
-        ...DEFAULT_HEADERS,
+        ...getDefaultHeaders(),
         ...headers,
       },
       data: body,     // for POST, PUT
       params: params, // for GET query params
     };
     const res = await axios(config);
+
     return {
       status: res.status,
       ...res.data
@@ -30,20 +34,27 @@ export const makeRequest = async (url, options = {}) => {
   } catch (error) {
     console.log("Axios Error:", error.response);
     if (error.response) {
+      // 🔥 AUTO LOGOUT ON 401
+      if (error.response.status === 401) {
+        clearAuthSession();
+        setTimeout(()=>{
+          window.location.href = "/login";
+        },2000)
+      }
       return {
         success: false,
-        msg: error.response.data?.message || "Server error",
+        message: error.response.data?.message || "Server error",
         status: error.response.status,
       };
     } else if (error.request) {
       return {
         success: false,
-        msg: "No response from server",
+        message: "No response from server",
       };
     } else {
       return {
         success: false,
-        msg: error.message,
+        message: error.message,
       };
     }
   }

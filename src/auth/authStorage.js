@@ -1,158 +1,33 @@
-const USERS_KEY = "crm-auth-users";
-const SESSION_KEY = "crm-auth-session";
-const RESET_KEY = "crm-auth-reset";
+const TOKEN_KEY = "_bb_key";
+const AUTH_KEY = "_auth_id";
+const USER_KEY = "user";
 
-const defaultUsers = [
-  {
-    id: "user-1",
-    name: "Admin User",
-    email: "admin@crm.local",
-    password: "Admin@123",
-  },
-];
+export const saveAuthSession = ({ token, user ,authid}) => {
+  localStorage.setItem(TOKEN_KEY, token);
+  localStorage.setItem(AUTH_KEY, authid);
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
+};
 
-function canUseStorage() {
-  return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
-}
+export const clearAuthSession = () => {
+  localStorage.removeItem("_bb_key");
+  localStorage.removeItem("_auth_id");
+  localStorage.removeItem("user");
+};
 
-function readJson(key, fallback) {
-  if (!canUseStorage()) {
-    return fallback;
-  }
+export const getCurrentSession = () => {
+  const token = localStorage.getItem(TOKEN_KEY);
 
-  try {
-    const value = window.localStorage.getItem(key);
-    return value ? JSON.parse(value) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function writeJson(key, value) {
-  if (!canUseStorage()) {
-    return;
-  }
-
-  window.localStorage.setItem(key, JSON.stringify(value));
-}
-
-export function initializeAuthStorage() {
-  const users = readJson(USERS_KEY, null);
-
-  if (!users || !Array.isArray(users) || users.length === 0) {
-    writeJson(USERS_KEY, defaultUsers);
-  }
-}
-
-export function getStoredUsers() {
-  return readJson(USERS_KEY, defaultUsers);
-}
-
-export function getCurrentSession() {
-  return readJson(SESSION_KEY, null);
-}
-
-export function loginWithLocalAuth(email, password) {
-  const users = getStoredUsers();
-  const normalizedEmail = email.trim().toLowerCase();
-
-  const matchedUser = users.find(
-    (user) => user.email.toLowerCase() === normalizedEmail && user.password === password
-  );
-
-  if (!matchedUser) {
-    return {
-      success: false,
-      message: "Invalid email or password.",
-    };
-  }
-
-  const session = {
-    id: matchedUser.id,
-    name: matchedUser.name,
-    email: matchedUser.email,
-    loggedInAt: new Date().toISOString(),
-  };
-
-  writeJson(SESSION_KEY, session);
+  if (!token) return null;
 
   return {
-    success: true,
-    session,
+    token,
+    user: JSON.parse(localStorage.getItem(USER_KEY) || "{}")
+
   };
-}
+};
 
-export function logoutFromLocalAuth() {
-  if (!canUseStorage()) {
-    return;
-  }
-
-  window.localStorage.removeItem(SESSION_KEY);
-}
-
-export function createPasswordResetRequest(email) {
-  const users = getStoredUsers();
-  const normalizedEmail = email.trim().toLowerCase();
-  const matchedUser = users.find((user) => user.email.toLowerCase() === normalizedEmail);
-
-  if (!matchedUser) {
-    return {
-      success: false,
-      message: "No account found with that email.",
-    };
-  }
-
-  const resetState = {
-    email: matchedUser.email,
-    code: "123456",
-    requestedAt: new Date().toISOString(),
-  };
-
-  writeJson(RESET_KEY, resetState);
-
-  return {
-    success: true,
-    email: matchedUser.email,
-    code: resetState.code,
-  };
-}
-
-export function getPasswordResetState() {
-  return readJson(RESET_KEY, null);
-}
-
-export function verifyResetCodeAndPassword({ email, code, password }) {
-  const resetState = getPasswordResetState();
-
-  if (!resetState || resetState.email.toLowerCase() !== email.trim().toLowerCase()) {
-    return {
-      success: false,
-      message: "Reset request not found. Please start again.",
-    };
-  }
-
-  if (resetState.code !== code.trim()) {
-    return {
-      success: false,
-      message: "Verification code is incorrect.",
-    };
-  }
-
-  const users = getStoredUsers();
-  const updatedUsers = users.map((user) =>
-    user.email.toLowerCase() === resetState.email.toLowerCase()
-      ? { ...user, password }
-      : user
-  );
-
-  writeJson(USERS_KEY, updatedUsers);
-
-  if (canUseStorage()) {
-    window.localStorage.removeItem(RESET_KEY);
-  }
-
-  return {
-    success: true,
-    message: "Password updated successfully.",
-  };
-}
+export const logoutFromLocalAuth = () => {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(USER_KEY);
+  localStorage.removeItem(AUTH_KEY);
+};

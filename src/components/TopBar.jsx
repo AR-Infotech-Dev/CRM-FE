@@ -7,8 +7,21 @@ import {
   Settings2,
   Sparkles,
 } from "lucide-react";
-
+import { useState } from "react";
+import Spinner from "./ui/Spinner";
 function TopBar({ onLogout }) {
+  const [isLoggingOut, setLoggingOut] = useState(false)
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+
+    setLoggingOut(true);
+
+    // small delay for loader effect
+    setTimeout(async () => {
+      await onLogout?.();
+      setLoggingOut(false);
+    }, 1200);
+  };
   return (
     <header className="topbar">
       <div className="topbar-left">
@@ -55,7 +68,11 @@ function TopBar({ onLogout }) {
           </div>
         </div>
         <button className="top-link accent">Share</button>
-        <button className="top-link" onClick={onLogout}>
+        <button className="top-link flex gap-2"
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+        >
+          {isLoggingOut && <Spinner classNames={"mx-4"} />} 
           Logout
         </button>
         <button className="topbar-profile">
