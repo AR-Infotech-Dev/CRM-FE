@@ -38,7 +38,7 @@ const CustomDatePicker = ({
         customInput={<DatePickerInput />}
         disabled={disabled}
         popperPlacement="bottom-start"
-        className="w-full"
+        className="w-full py-1.5"
       />
       {error && (
         <ValidationError error={error} />

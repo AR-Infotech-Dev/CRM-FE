@@ -4,17 +4,47 @@ import Select from "../form-inputs/Select";
 import TextArea from "../form-inputs/TextArea";
 import RichTextEditor from "../form-inputs/RichTextEditor";
 import SmartSelect from "../form-inputs/smartSelect";
+import SmartSelectInput from "../form-inputs/smartSelectInput";
 
 const SECTION_COLUMN_CLASS = {
-  1: "grid grid-cols-1 gap-4",
-  2: "grid grid-cols-1 gap-4 md:grid-cols-2",
-  3: "grid grid-cols-1 gap-4 md:grid-cols-3",
-  4: "grid grid-cols-1 gap-4 md:grid-cols-4",
+  1: "grid grid-cols-12 gap-x-4 gap-y-5",
+  2: "grid grid-cols-12 gap-x-4 gap-y-5",
+  3: "grid grid-cols-12 gap-x-4 gap-y-5",
+  4: "grid grid-cols-12 gap-x-4 gap-y-5",
 };
 
-function DynamicModuleForm({ sections = [], values = {}, onChange, errors= {} }) {
+const FIELD_SPAN_CLASS = {
+  1: "col-span-12",
+  2: "col-span-12 md:col-span-6",
+  3: "col-span-12 md:col-span-4",
+  4: "col-span-12 md:col-span-3",
+  5: "col-span-12 md:col-span-5",
+  6: "col-span-12 md:col-span-6",
+  7: "col-span-12 md:col-span-7",
+  8: "col-span-12 md:col-span-8",
+  9: "col-span-12 md:col-span-9",
+  10: "col-span-12 md:col-span-10",
+  11: "col-span-12 md:col-span-11",
+  12: "col-span-12",
+};
+
+function DynamicModuleForm({ sections = [], values = {}, onChange, onObjectSelect, errors = {} }) {
+  const getConditionalFlag = (field, key) => {
+    const flag = field[key];
+    return typeof flag === "function" ? Boolean(flag(values)) : Boolean(flag);
+  };
+
   const renderField = (field) => {
     const value = values[field.name] ?? "";
+    const emitValueChange = (nextValue) => {
+      onChange?.({
+        target: {
+          name: field.name,
+          value: nextValue,
+        },
+      });
+    };
+
     switch (field.type) {
       case "radio":
         return <Radio field={field} value={value} onChange={onChange} error={errors[field.name]} />
@@ -31,6 +61,17 @@ function DynamicModuleForm({ sections = [], values = {}, onChange, errors= {} })
       case "smartSelect":
         return <SmartSelect field={field} value={value} onSelect={onChange} config={field.config} error={errors[field.name]} />
         break;
+      case "smartSelectInput":
+        return <SmartSelectInput
+          id={field.id || field.name}
+          field={field}
+          value={value}
+          onSelect={emitValueChange}
+          onObjectSelect={(item) => onObjectSelect?.(field, item)}
+          config={field.config}
+          error={errors[field.name]}
+        />;
+        break;
       default:
         return <Input field={field} onChange={onChange} value={value} error={errors[field.name]} />
         break;
@@ -41,11 +82,33 @@ function DynamicModuleForm({ sections = [], values = {}, onChange, errors= {} })
     <div className="space-y-5">
       {sections.map((section, sectionIndex) => (
         <div key={`section-${sectionIndex}`} className={`mb-1 ${SECTION_COLUMN_CLASS[section.columns] || SECTION_COLUMN_CLASS[2]}`}>
-          {section.fields.map((field) => (
-            <div key={field.name} className={`w-full ${field.columns === 2 ? "md:col-span-2" : ""}`}>
-              {renderField(field)}
-            </div>
-          ))}
+          {section.fields.map((field) => {
+            const isVisible = field.visibleWhen
+              ? field.visibleWhen(values)
+              : true;
+
+            if (!isVisible) return null;
+            const isDisabled = getConditionalFlag(field, "disabled") || getConditionalFlag(field, "disabledWhen");
+            const isReadOnly =
+              getConditionalFlag(field, "readOnly") ||
+              getConditionalFlag(field, "readonly") ||
+              getConditionalFlag(field, "readOnlyWhen") ||
+              getConditionalFlag(field, "readonlyWhen");
+            const resolvedField = {
+              ...field,
+              disabled: isDisabled,
+              readOnly: isReadOnly,
+            };
+            const sectionColumns = Number(section.columns) || 2;
+            const defaultSpan = Math.max(1, Math.floor(12 / sectionColumns));
+            const fieldSpan = Number(field.gridSpan || field.columns || defaultSpan);
+            
+            return (
+              <div key={field.name} className={`w-full ${FIELD_SPAN_CLASS[fieldSpan] || FIELD_SPAN_CLASS[defaultSpan]}`}>
+                {renderField(resolvedField)}
+              </div>
+            )
+          })}
         </div>
       ))}
     </div>

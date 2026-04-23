@@ -1,147 +1,190 @@
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import FlyoutPanel from '../../../components/ui/FlyoutPanel'
-import ActionButton from "../../../components/ui/ActionButton";
-import FormField from "../../../components/ui/FormField";
-import DynamicFormLayout from "../../../components/ui/DynamicFormLayout";
-import Input from "../../../components/form-inputs/Input";
-import Checkbox from "../../../components/form-inputs/Checkbox";
-import RadioGroup from "../../../components/form-inputs/RadioGroup";
-import RichTextEditor from "../../../components/form-inputs/RichTextEditor";
-import { useState, useEffect } from "react";
-import { defualtFormData } from "../data/scheama";
+import { toast } from "react-toastify";
 import { makeRequest } from "../../../api/httpClient";
-import { toast } from 'react-toastify';
+import FlyoutPanel from "../../../components/ui/FlyoutPanel";
+import ActionButton from "../../../components/ui/ActionButton";
 import Spinner from "../../../components/ui/Spinner";
+import DynamicModuleForm from "../../../components/ui/DynamicModuleForm";
+import { menuMasterSchema } from "../data/module.schema";
 
-
-const layout = [
-    {
-        label: "Basic Info",
-        row: [
-            [
-                { field: "menuName", type: 'text', lable: 'Menu Name', required: true, colSpan: 1 },
-                { field: "menuLink", type: 'text', lable: 'Menu Link', required: true, colSpan: 1 },
-                { field: "module_name", type: 'text', lable: 'Module Name', required: true, colSpan: 1 },
-            ],
-            [
-                { field: "module_desc", type: 'text', lable: 'Module Description', required: true, colSpan: 2 },
-                { field: "table_name", type: 'text', lable: 'Table Name', required: true, colSpan: 1 },
-            ],
-        ],
-    },
-    {
-        label: "Settings",
-        row: [
-            [
-                { field: "status", type: 'select', lable: 'Status', required: true, colSpan: 1 },
-                { field: "mobile_screen", type: 'select', lable: 'Mobile Screen', required: true, colSpan: 1 },
-            ],
-        ],
-    }
-];
-
-const handleSaveAndNew = () => { }
-
-function MenuForm({ isOpen, onClose, title, selectedMenu, getMenuList }) {
-    if (!isOpen) return null;
-    const menuID = selectedMenu?._id;
-    const mode = selectedMenu ? 'edit' : 'create';
-    const [loading, setLoading] = useState(false);
-    const [formData, setFormData] = useState(defualtFormData || {});
-
-    const handleChange = (event) => {
-        const { name, value } = event.target;
-        setFormData((current) => ({
-            ...current,
-            [name]: value,
-        }));
-    };
-
-    const handleSave = async (event) => {
-        setLoading(true);
-        const url = (mode === 'create') ? `/menus/${mode}` : `/menus/${mode}/${menuID}`;
-        const res = await makeRequest(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: formData
-        });
-        console.log('res : ', res);
-
-        setLoading(false);
-        if (res.success) {
-            toast.success(res?.message);
-            setFormData(defualtFormData);
-            onClose();
-
-            getMenuList();
-        } else {
-            toast.error(res?.msg || "Error while creating Menu");
-        }
-    }
-    useEffect(() => {
-        if (mode === "edit" && selectedMenu) {
-            setFormData(selectedMenu);
-        } else {
-            setFormData(defualtFormData);
-        }
-    }, [selectedMenu, mode]);
-
-    return (
-        <FlyoutPanel
-            isOpen={isOpen}
-            onClose={onClose}
-            title={title}
-            closeButton={
-                <button className="flyout-close" onClick={onClose} aria-label="Close panel">
-                    <X size={18} />
-                </button>
-            }
-            footer={
-                <>
-                    <ActionButton className={`${loading && 'bg-purple-200 cursor-not-allowed'}`} disabled={loading} variant="flyoutPrimary" onClick={handleSave}>
-                        {loading && <Spinner />} Save
-                    </ActionButton>
-                </>
-            }
-        >
-            <div className="flyout-form-shell">
-                <div className="ws-main-container">
-                    {/* <div className="grid grid-cols-3 gap-4">
-                        <RadioGroup required={true} label={'Do You Want To Create Parent Menu?'} name={'is_parent'} onChange={handleChange} value={formData?.is_parent} options={
-                            [
-                                { 'label': 'Yes', 'value': 'y' },
-                                { 'label': 'No', 'value': 'n' }
-                            ]
-                        } />
-                        <RadioGroup required={true} label={'Do You Want To Give Access On Mobile?'} name={'mobile_screen'} onChange={handleChange} value={formData?.mobile_screen} options={
-                            [
-                                { 'label': 'Yes', 'value': 'y' },
-                                { 'label': 'No', 'value': 'n' }
-                            ]
-                        } />
-                        <RadioGroup required={true} label={'Do You Want To Link Exiting Module?'} name={'linked'} onChange={handleChange} value={formData?.linked} options={
-                            [
-                                { 'label': 'Yes', 'value': 'y' },
-                                { 'label': 'No', 'value': 'n' }
-                            ]
-                        } />
-                    </div> */}
-                    <div className="grid grid-cols-3 gap-4">
-                        <Input required={true} label={'Menu Name'} name={'menu_name'} onChange={handleChange} value={formData?.menu_name} placeholder={'Menu Name'} />
-                        <Input required={true} label={'Module Name'} name={'module_name'} onChange={handleChange} value={formData?.module_name} placeholder={'Module Name'} />
-                        <Input required={true} label={'Menu Link'} name={'menu_link'} onChange={handleChange} value={formData?.menu_link} placeholder={'Menu Link'} />
-                    </div>
-                    <div className="grid grid-cols-3 gap-4">
-                        <Input required={true} label={'Label'} name={'label'} value={formData?.label} onChange={handleChange} placeholder={'Lable'} />
-                        <Input required={false} label={'Plural Label'} name={'plural_lable'} value={formData?.plural_label} onChange={handleChange} placeholder={'Plural Lable'} />
-                    </div>
-                    <div className="grid grid-cols-1 gap-4">
-                        <RichTextEditor required={true} name={'module_description'} onChange={handleChange} value={formData?.module_description} label={'Module Description'} />
-                    </div>
-                </div>
-            </div>
-        </FlyoutPanel>
-    )
+function getMenuIdentifier(menu = {}) {
+  return menu?.menuID;
 }
 
-export default MenuForm
+function normalizeMenuData(selectedMenu = {}) {
+  return {
+    ...menuMasterSchema.form.initialValues,
+    ...selectedMenu,
+    menuName: selectedMenu?.menuName || "",
+    module_name: selectedMenu?.module_name || "",
+    module_desc: selectedMenu?.module_desc || "",
+    menuLink: selectedMenu?.menuLink || "",
+    parentID: selectedMenu?.parentID || "",
+    iconName: selectedMenu?.iconName || "",
+    status: selectedMenu?.status || "active",
+  };
+}
+
+function MenuForm({ isOpen, onClose, selectedMenu, onAfterSave }) {
+  const [loading, setLoading] = useState(false);
+  const [fetchingMenu, setFetchingMenu] = useState(false);
+  const [formData, setFormData] = useState(menuMasterSchema.form.initialValues);
+  const [errors, setErrors] = useState({});
+
+  const mode = selectedMenu ? "edit" : "create";
+  const menuID = getMenuIdentifier(selectedMenu);
+
+  // ======================================
+  // FETCH MENU DETAILS (EDIT)
+  // ======================================
+  useEffect(() => {
+    const fetchMenuDetails = async () => {
+      if (!isOpen || !menuID) return;
+
+      try {
+        setFetchingMenu(true);
+
+        const res = await makeRequest(
+          `${menuMasterSchema.api.edit}/${menuID}`,
+          { method: "GET" }
+        );
+
+        setFormData(normalizeMenuData(res?.data));
+      } catch (error) {
+        toast.error("Unable to fetch menu details");
+        setFormData(normalizeMenuData(selectedMenu));
+      } finally {
+        setFetchingMenu(false);
+      }
+    };
+
+    if (selectedMenu && isOpen) {
+      fetchMenuDetails();
+      return;
+    }
+
+    setFormData(menuMasterSchema.form.initialValues);
+  }, [selectedMenu, isOpen, menuID]);
+
+  // ======================================
+  // HANDLE CHANGE
+  // ======================================
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // ======================================
+  // SAVE MENU
+  // ======================================
+  const handleSave = async () => {
+    const result =
+      menuMasterSchema.validationSchema.safeParse(formData);
+
+    if (!result.success) {
+      const newErrors = {};
+
+      result.error.issues.forEach((item) => {
+        newErrors[item.path[0]] = item.message;
+      });
+
+      setErrors(newErrors);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setErrors({});
+
+      const saveUrl =
+        mode === "create"
+          ? menuMasterSchema.api.create
+          : `${menuMasterSchema.api.edit}/${menuID}`;
+
+      const method = mode === "create" ? "PUT" : "POST";
+
+      const res = await makeRequest(saveUrl, {
+        method,
+        body: formData,
+      });
+
+      if (res.success) {
+        toast.success(
+          res?.message ||
+            `Menu ${
+              mode === "create" ? "created" : "updated"
+            } successfully`
+        );
+
+        setFormData(menuMasterSchema.form.initialValues);
+        onClose();
+        onAfterSave?.();
+        return;
+      }
+
+      toast.error(res?.message || "Something went wrong");
+    } catch (error) {
+      toast.error(error.message || "Server error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ======================================
+  // CLOSE
+  // ======================================
+  const handleClose = () => {
+    setFormData(menuMasterSchema.form.initialValues);
+    setErrors({});
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <FlyoutPanel
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={selectedMenu ? "Edit Menu" : "Create Menu"}
+      closeButton={
+        <button className="flyout-close" onClick={onClose}>
+          <X size={18} />
+        </button>
+      }
+      footer={
+        <ActionButton
+          disabled={loading}
+          variant="flyoutPrimary"
+          onClick={handleSave}
+        >
+          {loading || fetchingMenu ? <Spinner /> : null}
+          Save
+        </ActionButton>
+      }
+    >
+      <div className="flyout-form-shell">
+        <div className="ws-main-container">
+          {fetchingMenu ? (
+            <div className="p-5 text-center">
+              <Spinner />
+            </div>
+          ) : (
+            <DynamicModuleForm
+              sections={menuMasterSchema.form.sections}
+              values={formData}
+              onChange={handleChange}
+              errors={errors}
+            />
+          )}
+        </div>
+      </div>
+    </FlyoutPanel>
+  );
+}
+
+export default MenuForm;

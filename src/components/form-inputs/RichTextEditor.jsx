@@ -6,7 +6,10 @@ import ValidationError from "./ValidationError";
 
 const RichTextEditor = ({ field, value, onChange, className = '', modules, error }) => {
   const quillRef = useRef(null);
+  const isReadOnly = Boolean(field.disabled || field.readOnly);
   const handleEditorChange = (content) => {
+    if (isReadOnly) return;
+
     // 👇 simulate normal input event
     onChange({
       target: {
@@ -17,16 +20,18 @@ const RichTextEditor = ({ field, value, onChange, className = '', modules, error
   };
 
   return (
-    <div className="bg-white p-2" >
-      <DefaultLabel label={field.label} required={field.required} />
+    <div className="bg-white p-1" >
+      
+      {field.label && <DefaultLabel label={field.label} required={field.required} />}
       <ReactQuill
         ref={quillRef}
         name={field.name}
         theme="snow"
         value={value}
         onChange={handleEditorChange}
-        className={`mt-2 ${className}`}
+        className={`mt-0 ${className}`}
         modules={modules}
+        readOnly={isReadOnly}
       />
       {error && (
         <ValidationError error={error} />

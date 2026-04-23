@@ -737,6 +737,7 @@ button {
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  padding: 2px 5px 5px 2px;
 }
 
 .module-table-panel .table-card {
@@ -1814,4 +1815,8 @@ input[type="checkbox"] {
   width: 1.25em;
   height: 1.25em;
   border-width: 2.5px;
+}
+
+.content-area{
+  overflow-y: auto;
 }

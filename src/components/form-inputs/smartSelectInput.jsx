@@ -5,14 +5,15 @@ import { FixedSizeList as List } from 'react-window';
 import { makeRequest } from "../../api/httpClient";
 
 import { API_BASE_URL } from '../../api/config';
-import Cookies from 'js-cookie';
 import { Check } from 'lucide-react';
+import DefaultLabel from './DefaultLabel';
+import ValidationError from './ValidationError';
 // import DropdownPortal from './DropdownPortal';
 // import { useCategoryCreateStore } from '@plugin/categories/store/useCategoryCreateStore';
 // import { createEntityMap } from '@components/GlobalModals';
-import { useFloating, offset, flip, shift, autoUpdate, FloatingPortal } from '@floating-ui/react';
 const cacheStore = new Map();
-const SmartSelectInput = ({ id, value, onSelect, onObjectSelect = {}, config, addNewFunction }) => {
+const SmartSelectInput = ({ id, field = {}, value, onSelect, onObjectSelect, config = {}, error, addNewFunction }) => {
+  const isLocked = Boolean(field.disabled || field.readOnly);
   const {
     type = 'category',
     source = '',
@@ -41,14 +42,8 @@ const SmartSelectInput = ({ id, value, onSelect, onObjectSelect = {}, config, ad
   const inputRef = useRef(null);
   const containerRef = useRef(null);
   const [hasMore, setHasMore] = useState(true);
-  const [inputWidth, setInputWidth] = useState(0);
   const [page, setPage] = useState("0");
   const listRef = useRef(null);
-  const { refs, floatingStyles, update, } = useFloating({
-    middleware: [offset(4), flip(), shift()],
-    placement: 'bottom-start',
-    whileElementsMounted: autoUpdate,
-  });
 
   // Normalize fetched items
   const normalizeOptions = (items = []) => items.map(item => ({
@@ -56,12 +51,6 @@ const SmartSelectInput = ({ id, value, onSelect, onObjectSelect = {}, config, ad
     label: getLabel ? getLabel(item) : item.name || 'Unnamed',
     original: item,
   }));
-
-  useEffect(() => {
-    if (showDropdown && refs.reference.current) {
-      setInputWidth(refs.reference.current.offsetWidth);
-    }
-  }, [showDropdown, refs.reference]);
 
   // Fetch once, then always filter locally
   const fetchOptions = async (page) => {
@@ -74,6 +63,7 @@ const SmartSelectInput = ({ id, value, onSelect, onObjectSelect = {}, config, ad
     let res = {}, data = [], newOptions = [];
     if (type === 'category') {
       let urlType = customURL || `${API_BASE_URL}/searchSlugList`;
+
       const posData = customURL ? customParameters : { status: 'active', slug: source };
 
       res = await makeRequest(urlType, {
@@ -87,7 +77,7 @@ const SmartSelectInput = ({ id, value, onSelect, onObjectSelect = {}, config, ad
       data = customURL ? res?.data || [] : res.data[0]?.sublist || [];
     } else {
       // res = await fetchJson(`${API_BASE_URL}/searchList`, {
-      res = await makeRequest(`${API_BASE_URL}/searchList`, {
+      res = await makeRequest(`${API_BASE_URL}/system/searchList`, {
         method: 'POST', headers,
         body: JSON.stringify({
           text: '',
@@ -161,6 +151,9 @@ const SmartSelectInput = ({ id, value, onSelect, onObjectSelect = {}, config, ad
       if (!alive) return;
       const matched = pool.filter(opt => ids.includes(String(opt.value)));
       setInternalValue(multi ? matched : (matched[0] ?? null));
+      if (matched.length) {
+        onObjectSelect?.(multi ? matched : matched[0]);
+      }
     };
 
     if (isCleared) {
@@ -188,10 +181,7 @@ const SmartSelectInput = ({ id, value, onSelect, onObjectSelect = {}, config, ad
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        !refs.floating.current?.contains(event.target) &&
-        !refs.reference.current?.contains(event.target)
-      ) {
+      if (!containerRef.current?.contains(event.target)) {
         setShowDropdown(false);
       }
     };
@@ -201,31 +191,37 @@ const SmartSelectInput = ({ id, value, onSelect, onObjectSelect = {}, config, ad
     };
   }, [showDropdown]);
   const handleSelect = (item) => {
+    if (isLocked) return;
+
     if (multi) {
       let selected = Array.isArray(internalValue) ? [...internalValue] : [];
       const already = selected.find(v => v.value === item.value);
       selected = already ? selected.filter(v => v.value !== item.value) : [...selected, item];
       setInternalValue(selected);
-      onSelect(selected.map(i => i.value).join(','));
+      onSelect?.(selected.map(i => i.value).join(','));
       onObjectSelect?.(item);
     } else {
       setInternalValue(item);
       setInputValue('');  // reset after select
       setShowDropdown(false);
-      onSelect(item.value);
+      onSelect?.(item.value);
       onObjectSelect?.(item);
     }
   };
 
   const handleClear = () => {
+    if (isLocked) return;
+
     setInternalValue(multi ? [] : null);
     setInputValue(null);
     setShowDropdown(false);
-    onSelect('');
+    onSelect?.('');
     onObjectSelect?.({});
   };
   const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1);
   const handleRefresh = () => {
+    if (isLocked) return;
+
     cacheStore.delete(key);
     localStorage.removeItem(`recent_${key}`);
     setPage(0);
@@ -291,79 +287,73 @@ const SmartSelectInput = ({ id, value, onSelect, onObjectSelect = {}, config, ad
   };
 
   return (
-    <div ref={containerRef} className="relative w-full">
-      {label && (
-        <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+    <div className="flex min-w-0 flex-col gap-1 p-1">
+      {(field.label || label) && (
+        <DefaultLabel label={field.label || label} required={field.required} />
       )}
-      {multi ? (
-        <div onClick={() => { setShowDropdown(true); inputRef.current?.focus(); }}
-          className={`flex flex-wrap gap-1 rounded w-full transition-all
-               ${internalValue.length > 0 ? 'border px-2 py-1' : ''}`}>
-          {internalValue.map((v, i) => (
-            <span key={i} className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm">
-              {v.label}
-              <button onClick={(e) => {
-                e.stopPropagation();
-                const updated = internalValue.filter(item => item.value !== v.value);
-                setInternalValue(updated);
-                onObjectSelect?.(updated);
-                onSelect(updated.map(i => i.value).join(','));
-              }} className="ml-1">&times;</button>
-            </span>
-          ))}
-          <input
-            ref={el => {
-              inputRef.current = el;
-              refs.setReference(el);
-            }}
-            onBlur={() => {
-              if (!multi && inputValue === '') {
-                setInternalValue(null);
-                onSelect('');
-                onObjectSelect?.({});
-              }
-            }}
-            className="ws-input form-input w-full flex-grow min-w-[120px] border-none bg-gray-100 focus:outline-none h-10 rounded text-sm px-3 py-2 pr-2 outline-none text-sm"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder={internalValue.length ? '' : placeholder}
-          />
-        </div>
-      ) : (
-        <div className="relative">
-          <input
-            id={id}
-            name={id}
-            type="text"
-            autoComplete="off"
-            ref={refs.setReference}
-            value={inputValue || internalValue?.label || ''}
-            onChange={(e) => setInputValue(e.target.value)}
-            onFocus={() => setShowDropdown(true)}
-            placeholder={placeholder}
-            className="ws-input form-input w-full text-gray-600 text-md bg-gray-100 rounded focus:outline-none text-sm px-3 py-2 pr-10 rounded"
-          />
-          {internalValue && (
-            <button type="button" onClick={handleClear}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-red-500">
-              &times;
-            </button>
-          )}
-        </div>
-      )}
+      <div ref={containerRef} className="relative w-full">
+        {multi ? (
+          <div onClick={() => { if (!isLocked) { setShowDropdown(true); inputRef.current?.focus(); } }}
+            aria-disabled={isLocked}
+            className={`flex min-h-[34px] w-full flex-wrap gap-1 rounded border bg-gray-100 px-3 py-1.5 text-sm transition-all focus-within:outline-none focus-within:ring-2 focus-within:ring-purple-100 ${isLocked ? "cursor-not-allowed opacity-70" : ""} ${error ? "border-red-400 text-red-600" : "border-gray-50 text-gray-600"}`}>
+            {internalValue.map((v, i) => (
+              <span key={i} className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm">
+                {v.label}
+                {!isLocked && <button onClick={(e) => {
+                  e.stopPropagation();
+                  const updated = internalValue.filter(item => item.value !== v.value);
+                  setInternalValue(updated);
+                  onObjectSelect?.(updated);
+                  onSelect?.(updated.map(i => i.value).join(','));
+                }} className="ml-1">&times;</button>}
+              </span>
+            ))}
+            <input
+              ref={inputRef}
+              name={id}
+              onBlur={() => {
+                if (!multi && inputValue === '') {
+                  setInternalValue(null);
+                  onSelect?.('');
+                  onObjectSelect?.({});
+                }
+              }}
+              className="min-w-[120px] flex-grow border-none bg-transparent text-sm outline-none focus:outline-none"
+              value={inputValue}
+              onChange={(e) => !isLocked && setInputValue(e.target.value)}
+              disabled={isLocked}
+              readOnly={isLocked}
+              placeholder={internalValue.length ? '' : placeholder}
+            />
+          </div>
+        ) : (
+          <div className="relative">
+            <input
+              id={id}
+              name={id}
+              type="text"
+              autoComplete="off"
+              ref={inputRef}
+              value={inputValue || internalValue?.label || ''}
+              onChange={(e) => !isLocked && setInputValue(e.target.value)}
+              onFocus={() => !isLocked && setShowDropdown(true)}
+              placeholder={placeholder}
+              disabled={isLocked}
+              readOnly={isLocked}
+              className={`w-full rounded border bg-gray-100 px-3 py-1.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-purple-100 disabled:cursor-not-allowed disabled:opacity-70 ${error ? "border-red-400 text-red-600" : "border-gray-50 text-gray-600"}`}
+            />
+            {internalValue && !isLocked && (
+              <button type="button" onClick={handleClear}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-red-500">
+                &times;
+              </button>
+            )}
+          </div>
+        )}
 
-      {showDropdown && (
-        <FloatingPortal>
-          <div
-            ref={refs.setFloating}
-            style={{
-              ...floatingStyles,
-              minWidth: inputWidth || 200,              // Match the input's width
-              maxWidth: 480,                     // You can adjust this (or use '100vw' for full window)
-            }}
-            className="z-50 max-h-60 border bg-white shadow-lg rounded-md text-sm"
-          >
-            <div className="flex pr-2 pt-1 bg-blue-50 p-2 h-10 align-center justify-between">
+        {showDropdown && !isLocked && (
+          <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 border-gray-300 border bg-white shadow-lg rounded-md text-sm" >
+            <div className="flex pr-2 pt-1 bg-blue-50 p-2 h-10 rounded-md align-center justify-between">
               {loading ? (
                 <div className="p-3 text-sm text-gray-500">Loading...</div>
               ) : (
@@ -380,14 +370,12 @@ const SmartSelectInput = ({ id, value, onSelect, onObjectSelect = {}, config, ad
                 </button>
               )} */}
             </div>
-
-
-            <List ref={listRef} height={200} itemCount={filteredOptions.length} onScroll={handleScroll} itemSize={44} width="100%">
-              {Row}
-            </List>
-
+            <List ref={listRef} height={200} itemCount={filteredOptions.length} onScroll={handleScroll} itemSize={44} width="100%">{Row}</List>
           </div>
-        </FloatingPortal>
+        )}
+      </div>
+      {error && (
+        <ValidationError error={error} />
       )}
     </div>
   );

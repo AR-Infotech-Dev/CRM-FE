@@ -1,7 +1,7 @@
-const Spinner = ({ size = 'sm', classNames="" }) => (
+const Spinner = ({ size = 'sm' }) => (
   <span
-    className={`spinner spinner-\${size}`}
-    aria-hidden={"true"}
+    className={`spinner spinner-${size}`}
+    aria-hidden="true"
   />
 );
 

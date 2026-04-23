@@ -18,7 +18,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  width: min(100%, 89 0px);
+  width: min(100%, 835px);
   height: calc(100vh - var(--topbar-height));
   max-height: calc(100vh - var(--topbar-height));
   background: #ffffff;
@@ -113,6 +113,7 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  scrollbar-gutter: stable;
   background: #ffffff;
 }
 
@@ -120,13 +121,18 @@
   display: flex;
   flex-direction: column;
   min-height: 100%;
+  width: 100%;
+  min-width: 0;
 }
 
 .ws-main-container {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  padding: 18px 24px 24px;
+  /* padding: 18px 24px 24px; */
+  padding: 0px 0px 24px;
+  width: 100%;
+  min-width: 0;
 }
 
 .left-space {
@@ -259,13 +265,75 @@
   border-top: 1px solid #dfe3eb;
 }
 
+.ticket-drawer-layout {
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.ticket-form-shell {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ticket-form-shell .ws-main-container {
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+.ticket-scroll-pane {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.ticket-scroll-pane::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.ticket-scroll-pane::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ticket-scroll-pane::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.ticket-scroll-pane::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.client-history-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.client-history-panel .histories {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 8px;
+}
+
 .ql-container {
   min-height: 150px;
-  border-radius: 0 0 8px 8px;
+  border-radius: 0 0 0px 0px;
+  border-color: #394861;
 }
 
 .ql-toolbar {
-  border-radius: 8px 8px 0 0;
+  border-radius: 0px 0px 0 0;
+  border-color: #394861;
 }
 
 
@@ -299,13 +367,13 @@
 }
 
 .text-xs {
-  font-size: .75rem;
+  font-size: .65rem;
   line-height: 1rem;
 }
 
 .text-sm {
-  font-size: .875rem;
-  line-height: 1.25rem;
+  font-size: .75rem;
+  line-height: 1rem;
 }
 
 .rounded {
@@ -318,7 +386,7 @@
 }
 
 .ql-toolbar {
-  border-radius: .25rem;
+  /* border-radius: .25rem; */
 }
 
 .gap-1 {

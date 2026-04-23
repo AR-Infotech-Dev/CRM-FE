@@ -10,9 +10,12 @@ const DynamicField = ({
   options = [],
   placeholder = "",
   error = "",
+  disabled = false,
+  readOnly = false,
 }) => {
+  const isLocked = Boolean(disabled || readOnly);
   const commonClass =
-    "w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500";
+    "w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-70 read-only:cursor-default";
 
   const renderField = () => {
     switch (type) {
@@ -22,6 +25,7 @@ const DynamicField = ({
             name={name}
             value={value || ""}
             onChange={onChange}
+            disabled={isLocked}
             className={commonClass}
           >
             <option value="">Select</option>
@@ -40,6 +44,8 @@ const DynamicField = ({
             value={value || ""}
             onChange={onChange}
             placeholder={placeholder}
+            disabled={disabled}
+            readOnly={readOnly}
             className={commonClass}
             rows={3}
           />
@@ -52,6 +58,7 @@ const DynamicField = ({
             name={name}
             checked={value || false}
             onChange={onChange}
+            disabled={isLocked}
           />
         );
 
@@ -63,6 +70,8 @@ const DynamicField = ({
             value={value || ""}
             onChange={onChange}
             placeholder={placeholder}
+            disabled={disabled}
+            readOnly={readOnly}
             className={commonClass}
           />
         );
@@ -77,7 +86,7 @@ const DynamicField = ({
         {renderField()}
 
         {/* CLEAR BUTTON */}
-        {onClear && type !== "checkbox" && value && (
+        {onClear && !isLocked && type !== "checkbox" && value && (
           <button
             type="button"
             onClick={() => onClear(name)}

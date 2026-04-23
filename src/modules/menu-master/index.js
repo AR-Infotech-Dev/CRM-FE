@@ -1,1 +1,1 @@
-export { default as MenuMasterModulePage } from "./MenuMasterModulePage";
+export { default as MenuArrangementPage } from "./MenuArrangementPage";

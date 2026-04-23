@@ -1,151 +1,174 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-
+import { useEffect, useMemo, useState } from "react";
+import { NavLink } from "react-router-dom";
 import { makeRequest } from "../api/httpClient";
-import {
-  BriefcaseBusiness,
-  Building2,
-  ChevronDown,
-  FileText,
-  Gauge,
-  KeyRound,
-  LayoutGrid,
-  Mail,
-  MenuSquare,
-  NotepadText,
-  Sparkles,
-  ShieldCheck,
-  Users,
-  Workflow,
-} from "lucide-react";
+import { BriefcaseBusiness, Building2, ChevronDown, FileText, Gauge, KeyRound, LayoutGrid, Mail, MenuSquare, NotepadText, Sparkles, ShieldCheck, Users, Workflow, Folder, } from "lucide-react";
 
-// ✅ ICON MAP (IMPORTANT)
-const iconMap = {
-  Users,
-  ShieldCheck,
-  MenuSquare,
-  BriefcaseBusiness,
-  Building2,
-  FileText,
-  Gauge,
-  KeyRound,
-  LayoutGrid,
-  Mail,
-  NotepadText,
-  Sparkles,
-  Workflow,
-};
+const iconMap = { Users, ShieldCheck, MenuSquare, BriefcaseBusiness, Building2, FileText, Gauge, KeyRound, LayoutGrid, Mail, NotepadText, Sparkles, Workflow, };
+const getIcon = (iconName) => iconMap[iconName] || Folder;
 
-// ✅ BUILD SIDEBAR FROM API
-const buildSidebar = (menus) => {
-  const parents = menus.filter((m) => m.isParent === "yes");
-  const children = menus.filter((m) => m.isParent === "no");
-
-  return parents.map((parent) => ({
+const buildSidebar = (menus = []) => {
+  return menus.map((parent) => ({
+    id: parent.menuID,
     title: parent.menuName,
-    items: children
-      .filter((child) => child.parentID === parent.menuID)
-      .map((child) => ({
-        label: child.menuName,
-        moduleId: child.menuLink,
-        icon: iconMap[child.iconName] || Users, // ✅ FIXED
-      })),
+    icon: getIcon(parent.iconName),
+    moduleId: parent.menuLink,
+    items: (parent.subMenu || []).map((child) => ({
+      id: child.menuID,
+      label: child.menuName,
+      moduleId: child.menuLink,
+      icon: getIcon(child.iconName),
+    })),
   }));
 };
 
 function Sidebar({ activeModule = "", onSelectModule }) {
   const [sidebarGroups, setSidebarGroups] = useState([]);
   const [collapsedGroups, setCollapsedGroups] = useState({});
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchMenus = async () => {
+      try {
+        setLoading(true);
+
+        const res = await makeRequest("/menus/getMenuList", {
+          method: "GET",
+        });
+
+        const menuData = res?.data || [];
+
+        const groups = buildSidebar(menuData);
+
+        setSidebarGroups(groups);
+
+        const defaultOpen = {};
+        groups.forEach((g) => {
+          defaultOpen[g.title] = false;
+        });
+
+        setCollapsedGroups(defaultOpen);
+      } catch (error) {
+        console.log("Sidebar Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMenus();
+  }, []);
+
+  // ===============================
+  // TOGGLE GROUP
+  // ===============================
   const toggleGroup = (title) => {
-    if (!title) return;
-
     setCollapsedGroups((prev) => ({
       ...prev,
       [title]: !prev[title],
     }));
   };
 
+  // ===============================
+  // AUTO OPEN ACTIVE GROUP
+  // ===============================
   useEffect(() => {
-    const getMenuList = async () => {
-      try {
-        const res = await makeRequest("/menus", {
-          method: "post",
-          body: JSON.stringify({ getAll: "Y" }),
-        });
+    sidebarGroups.forEach((group) => {
+      const hasActiveChild = group.items.some(
+        (item) => item.moduleId === activeModule
+      );
 
-        if (res?.data) {
-          const groups = buildSidebar(res.data);
-          setSidebarGroups(groups); // ✅ Correct state update
-        }
-      } catch (err) {
-        console.error("Sidebar Error:", err);
+      if (hasActiveChild) {
+        setCollapsedGroups((prev) => ({
+          ...prev,
+          [group.title]: false,
+        }));
       }
-    };
-
-    getMenuList();
-
-  }, []);
+    });
+  }, [activeModule, sidebarGroups]);
 
   return (
     <aside className="sidebar">
       <div className="sidebar-sections">
-        {console.log(sidebarGroups)}
-        {sidebarGroups.map((group) => (
-          <section key={group.title} className="sidebar-group">
-            {/* GROUP HEADER */}
-            <button
-              type="button"
-              className="sidebar-group-title sidebar-group-toggle"
-              onClick={() => toggleGroup(group.title)}
-            >
-              <span>{group.title}</span>
-              <ChevronDown
-                size={14}
-                className={collapsedGroups[group.title] ? "is-collapsed" : ""}
-              />
-            </button>
+        {loading && (
+          <div className="p-4 text-sm opacity-70">
+            Loading menu...
+          </div>
+        )}
 
-            {/* GROUP ITEMS */}
-            <div
-              className={`sidebar-group-items ${collapsedGroups[group.title] ? "collapsed" : ""
-                }`}
-            >
-              {group.items.map((item) => {
-                const Icon = item.icon;
+        {/* ======================= */}
+        {/* MENU GROUPS */}
+        {/* ======================= */}
+        {!loading &&
+          sidebarGroups.map((group) => {
+            const GroupIcon = group.icon;
+            const isCollapsed = collapsedGroups[group.title];
 
-                const isActive = item.moduleId === activeModule;
+            const isDirectActive =
+              group.moduleId &&
+              group.items.length === 0 &&
+              group.moduleId === activeModule;
 
-                return (
-                  <Link key={item.menuID} className="no-underline" to={item.moduleId}>
-                    <button
-                      key={item.label}
-                      className={`sidebar-item w-full ${isActive ? "active" : ""}`}
-                      onClick={() =>
-                        item.moduleId && onSelectModule?.(item.moduleId)
-                      }
-                    >
-                      <span className="sidebar-icon">
-                        <Icon size={16} />
-                      </span>
-                      <span className="no-underline">
-                        {item.label}
-                      </span>
-                    </button>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
-        ))}
+            return (
+              <section key={group.id} className="sidebar-group">
+
+                {/* ======================= */}
+                {/* GROUP HEADER */}
+                {/* ======================= */}
+                <button type="button" className={`sidebar-group-title sidebar-group-toggle ${isDirectActive ? "active" : ""}`}
+                  onClick={() => {
+                    if (group.items.length) {
+                      toggleGroup(group.title);
+                    } else {
+                      onSelectModule?.(group.moduleId);
+                    }
+                  }} >
+                  <span className="flex items-center gap-2">
+                    <GroupIcon size={16} /> {group.title}
+                  </span>
+
+                  {group.items.length > 0 && (
+                    <ChevronDown size={14} className={isCollapsed ? "rotate-180" : ""} />
+                  )}
+                </button>
+
+                {/* ======================= */}
+                {/* CHILD ITEMS */}
+                {/* ======================= */}
+                {group.items.length > 0 && !isCollapsed && (
+                  <div className="sidebar-group-items">
+                    {group.items.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = item.moduleId === activeModule;
+                      return (
+                        <NavLink
+                          key={item.id}
+                          to={`/${item.moduleId}`}
+                          className="no-underline"
+                          onClick={() => onSelectModule?.(item.moduleId) }
+                        >
+                          <button className={`sidebar-item w-full ${isActive ? "active" : "" }`} >
+                            <span className="sidebar-icon"> {/* <Icon size={15} /> */} </span>
+                            <span>{item.label}</span>
+                          </button>
+                        </NavLink>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+            );
+          })}
       </div>
 
+      {/* ======================= */}
       {/* FOOTER */}
+      {/* ======================= */}
       <div className="sync-card">
         <div className="sync-ring" />
         <div>
-          <div className="sync-title">Syncing hello@brixui.c...</div>
-          <div className="sync-subtitle">6060 emails processed</div>
+          <div className="sync-title">CRM Connected</div>
+          <div className="sync-subtitle">
+            Dynamic menu loaded from API
+          </div>
         </div>
       </div>
     </aside>

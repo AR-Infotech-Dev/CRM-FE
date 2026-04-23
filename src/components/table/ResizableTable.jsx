@@ -30,7 +30,7 @@ function getStatusClass(value) {
 }
 
 function getRowIdentifier(row) {
-  return row?._id ?? row?.id ?? row?.adminID ?? row?.menu_id ?? row?.roleId ?? row?.userId;
+  return row?._id ?? row?.id ?? row?.adminID ?? row?.ticket_id ?? row?.menu_id ?? row?.roleId ?? row?.userId;
 }
 
 function renderCell(column, row, index, selectionProps = {}) {
