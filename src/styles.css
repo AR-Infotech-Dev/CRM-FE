@@ -16,13 +16,9 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* Brand Primitive Colors */
   --brand-navy: #003B7D;
-  /* From "flowupS" text */
   --brand-sky: #0096D6;
-  /* From "LITE" and main arrow */
   --brand-accent: #32B5E8;
-  /* From arrow gradient accent */
 
   /* Semantic Mappings */
   --color-primary: var(--brand-sky);
@@ -33,13 +29,14 @@
   --color-bg: #FFFFFF;
   --color-text-main: var(--brand-navy);
   --color-text-muted: #6B7280;
-  /* Neutral grey for secondary info */
 
   /* Functional Colors (Standard) */
   --color-success: #10B981;
   --color-error: #EF4444;
   --color-warning: #F59E0B;
 }
+/* src/styles/colors.css */
+
 /* --- Brand Navy Classes (#003B7D) --- */
 .text-brand-primary { color: var(--brand-navy); }
 .bg-brand-primary { background-color: var(--brand-navy); }
@@ -306,8 +303,15 @@ button {
   height: var(--topbar-height);
   min-height: var(--topbar-height);
   padding: 6px 18px;
-  border-bottom: 1px solid rgba(126, 111, 171, 0.12);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 247, 255, 0.94));
+  /* border-bottom: 1px solid rgba(126, 111, 171, 0.12); */
+  border-bottom: 1px solid rgb(222, 230, 255);
+  /* background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 247, 255, 0.94)); */
+  background: linear-gradient(
+  180deg,
+  rgba(255, 255, 255, 0.98),
+  rgba(245, 250, 255, 0.94)
+);
+  /* background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 247, 255, 0.94)); */
 }
 
 .topbar-left,
@@ -591,8 +595,8 @@ button {
 }
 
 .ghost-button.primary {
-  color: #8f43ff;
-  border-color: rgba(155, 91, 255, 0.5);
+  color: var(--brand-sky);
+  border-color: var(--brand-accent) ;
 }
 
 .icon-button {
@@ -608,7 +612,7 @@ button {
 .gradient-button {
   color: #fff;
   border-color: transparent;
-  background: linear-gradient(180deg, #b857ff 0%, #7c3dff 100%);
+  background: linear-gradient(180deg, #5765ff 0%, #433dff 100%);
 }
 
 .flyout-button {

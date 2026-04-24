@@ -16,7 +16,7 @@ function MainRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/users" element={<UsersModulePage menuID={20} />} />
-          <Route path="/tickets" element={<TicketsModulePage menuID={320} />} />
+          <Route path="/tickets" element={<TicketsModulePage menuID={321} />} />
           <Route path="/menus" element={<MenuArrangementPage menuID={28} />} />
 
           <Route path="/user-roles" element={<UserRoleMasterModulePage />} />
