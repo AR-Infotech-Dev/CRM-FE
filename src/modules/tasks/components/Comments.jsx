@@ -67,13 +67,7 @@ function normalizeComments(rows = []) {
   }));
 }
 
-function Comments({
-  COMMENTS = [],
-  module = "tickets",
-  ticket_id,
-  module_id,
-  endpoints = DEFAULT_ENDPOINTS,
-}) {
+function Comments({ COMMENTS = [], module = "tickets", ticket_id, module_id, endpoints = DEFAULT_ENDPOINTS,}) {
   // const user = AuthProvider.us
   const user_id = localStorage.getItem("_auth_id")
   console.log('user_id :', user_id);
@@ -328,7 +322,7 @@ function Comments({
                         value={commentValue}
                         onChange={(event) => setCommentValue(event.target.value)}
                         placeholder="Write a comment, use @ to mention someone..."
-                        className="min-h-[84px] w-full resize-none rounded-md border border-slate-200 shadow-inner bg-white px-3 py-2 text-xs text-slate-700 outline-none placeholder:text-slate-400 focus:border-blue-300"
+                        className="min-h-[84px] w-full resize-none rounded-md shadow-inner bg-white px-3 py-2 text-xs text-slate-700 outline-none placeholder:text-slate-400 focus:border-blue-300"
                       />
                       <div className="mt-0 flex items-center justify-end">
                         {/* <div className="flex items-center gap-4 text-slate-500">
@@ -349,7 +343,7 @@ function Comments({
                       </div>
                     </div>
                   ) : (
-                    <div className={`mt-1 ml-7 rounded-md inset-1 border border-slate-200 px-1 py-3 shadow-inner `}>
+                    <div className={`mt-1 ml-7 rounded-md inset-1 px-1 py-3 shadow-inner `}>
                       <div className="comment-content text-xs leading-6 text-slate-600">
                         {isExpanded ? (
                           <span dangerouslySetInnerHTML={{ __html: commentHtml }} />

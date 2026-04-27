@@ -58,6 +58,12 @@ export const menuMasterSchema = {
     "modified_date",
   ],
 
+  tableCellConfig: [
+    { column_name: "menuName", type: "person" },
+    { column_name: "module_name", type: "tag" },
+    { column_name: "status", type: "badge", color_field: "status_color" },
+  ],
+
   columnMappings: [
     { menuName: "Menu Name" },
     { module_name: "Module Name" },
@@ -365,6 +371,8 @@ export const menuMasterFallbackColumns = [
     {
       columnMappings:
         menuMasterSchema.columnMappings,
+      tableCellConfig:
+        menuMasterSchema.tableCellConfig,
     }
   ),
 ];

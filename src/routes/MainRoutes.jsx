@@ -1,9 +1,11 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { UsersModulePage } from "../modules/users";
-import { UserRoleMasterModulePage } from "../modules/user-role-master";
 import { AccessControlModulePage } from "../modules/access-control";
 import { MenuArrangementPage} from "../modules/menu-master";
 import { TicketsModulePage } from "../modules/tasks";
+import { CategoryModulePage } from "../modules/category";
+// import { UserRoleMasterModulePage } from "../modules/user-role-master";
+// import { UsersRoleModulePage } from "../modules/users-role";
 import { getAuthRoutes } from "./AuthRoutes";
 import ProtectedRoute from "./ProtectedRoute";
 import AppLayout from "../layouts/AppLayout";
@@ -17,10 +19,12 @@ function MainRoutes() {
         <Route element={<AppLayout />}>
           <Route path="/users" element={<UsersModulePage menuID={20} />} />
           <Route path="/tickets" element={<TicketsModulePage menuID={321} />} />
-          <Route path="/menus" element={<MenuArrangementPage menuID={28} />} />
+          <Route path="/category" element={<CategoryModulePage menuID={320} />} />
 
-          <Route path="/user-roles" element={<UserRoleMasterModulePage />} />
+          <Route path="/menus" element={<MenuArrangementPage menuID={28} />} />
           <Route path="/access-control" element={<AccessControlModulePage />} />
+          {/* <Route path="/roles" element={<UsersRoleModulePage menuID={20} />} /> */}
+          {/* <Route path="/user-roles" element={<UserRoleMasterModulePage />} /> */}
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />

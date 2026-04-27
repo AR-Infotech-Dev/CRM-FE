@@ -6,7 +6,6 @@ const FIXED_TABLE_COLUMNS = [
   { key: "select", className: "check-col", checkbox: true, width: 42, minWidth: 42, resizable: false },
   // { key: "favorite", className: "icon-col", width: 42, minWidth: 42, resizable: false },
 ];
-
 export const usersModuleSchema = {
   // Copy this object for the next module and update API paths, joined tables,
   // default columns, skip fields, label mappings, and form sections only.
@@ -53,6 +52,12 @@ export const usersModuleSchema = {
   ],
   defaultColumns: ["name", "userName", "email", "contactNo", "roleID", "status"],
   skipFields: ["user_setting", "gfcmToken", "otp", "country_code", "otp_exp_time", "g_cal_token", "one_drive_access_token", "is_google_sync", "is_one_drive_sync", "ftoken", "isVerified", "photo", "adminID", "latitude", "longitude", "roleOfUser"],
+  tableCellConfig: [
+    { column_name: "name", type: "person" },
+    { column_name: "userName", type: "person" },
+    { column_name: "roleID", type: "tag" },
+    { column_name: "status", type: "badge", color_field: "status_color" },
+  ],
   columnMappings: [
     { is_sys_user: "System User" },
     { isEmailSend: "Verification Email Sent" },
@@ -70,22 +75,22 @@ export const usersModuleSchema = {
   form: {
     initialValues: {
       adminID: null,
-      name: "",
-      default_company: "",
+      name: null,
+      default_company: null,
       time_zone: "Asia/Kolkata",
-      company_id: "",
+      company_id: null,
       is_approver: "no",
-      userName: "",
-      email: "",
+      userName: null,
+      email: null,
       isEmailSend: "no",
-      password: "",
+      password: null,
       is_sys_user: "no",
-      roleID: "",
-      address: "",
-      google_location: "",
-      contactNo: "",
-      whatsappNo: "",
-      dateOfBirth: "",
+      roleID: null,
+      address: null,
+      google_location: null,
+      contactNo: null,
+      whatsappNo: null,
+      dateOfBirth: null,
       created_by: null,
       modified_by: null,
       status: "active",
@@ -243,11 +248,9 @@ export const usersModuleSchema = {
   validationSchema: z.object({
     name: z.string().min(1, "Name is required"),
 
-    userName: z.string()
-      .min(3, "Username must be at least 3 characters"),
+    userName: z.string().min(3, "Username must be at least 3 characters"),
 
-    email: z.string()
-      .email("Invalid email address"),
+    email: z.string().email("Invalid email address"),
 
     dateOfBirth: z.coerce.date()
       .min(new Date("1900-01-01"), { message: "Too old" })
@@ -273,5 +276,8 @@ export const usersFallbackColumns = [
   ...FIXED_TABLE_COLUMNS,
   ...buildFallbackColumnsFromKeys(usersModuleSchema.defaultColumns, {
     columnMappings: usersModuleSchema.columnMappings,
+    tableCellConfig: usersModuleSchema.tableCellConfig,
   }),
 ];
+
+console.log('usersFallbackColumns : ',usersFallbackColumns);

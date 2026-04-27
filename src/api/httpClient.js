@@ -34,7 +34,7 @@ export const makeRequest = async (url, options = {}) => {
   } catch (error) {
     console.log("Axios Error:", error.response);
     if (error.response) {
-      // 🔥 AUTO LOGOUT ON 401
+      // AUTO LOGOUT ON 401
       if (error.response.status === 401) {
         clearAuthSession();
         setTimeout(()=>{
