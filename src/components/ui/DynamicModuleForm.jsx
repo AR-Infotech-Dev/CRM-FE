@@ -5,6 +5,7 @@ import TextArea from "../form-inputs/TextArea";
 import RichTextEditor from "../form-inputs/RichTextEditor";
 import SmartSelect from "../form-inputs/smartSelect";
 import SmartSelectInput from "../form-inputs/smartSelectInput";
+import ColorSwatches from "../form-inputs/ColorSwatches";
 
 const SECTION_COLUMN_CLASS = {
   1: "grid grid-cols-12 gap-x-4 gap-y-5",
@@ -71,6 +72,9 @@ function DynamicModuleForm({ sections = [], values = {}, onChange, onObjectSelec
           config={field.config}
           error={errors[field.name]}
         />;
+        break;
+      case "colorSwatches":
+        return <ColorSwatches field={field} onChange={onChange} value={value} error={errors[field.name]} />;
         break;
       default:
         return <Input field={field} onChange={onChange} value={value} error={errors[field.name]} />

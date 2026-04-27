@@ -4,7 +4,6 @@ import { buildFallbackColumnsFromKeys } from "../../../utils/moduleStructure";
 // const auth_id = window.localStorage.getItem('auth_id')
 const FIXED_TABLE_COLUMNS = [
   { key: "select", className: "check-col", checkbox: true, width: 42, minWidth: 42, resizable: false },
-  { key: "favorite", className: "icon-col", width: 42, minWidth: 42, resizable: false },
 ];
 
 export const ticketsModuleSchema = {
@@ -25,41 +24,29 @@ export const ticketsModuleSchema = {
     modelNameField: "model_name",
     modelName: "Ticket",
   },
-  staticJoined: [
-    // {
-    //   field: "project_id",
-    //   fieldtype: "joined",
-    //   joinedTable: "projects",
-    //   select: "projectID,projectName",
-    //   primaryKey: "projectID",
-    //   labelKey: "projectName",
-    //   options: [],
-    // },
-    // {
-    //   field: "task_",
-    //   fieldtype: "joined",
-    //   joinedTable: "ticket_categories",
-    //   select: "catID,catName",
-    //   primaryKey: "catID",
-    //   labelKey: "catName",
-    //   options: [],
-    // },
+  staticJoined: [],
+  tableCellConfig: [
+    { column_name: "client_id", type: "person" },
+    // { column_name: "contact_person", type: "person" },
+    { column_name: "query_type", type: "badge", color_field: "type_color" },
+    { column_name: "ticket_status", type: "badge", color_field: "status_color" },
+    { column_name: "ticket_priority", type: "tag", color_field: "priority_color" },
+    // { column_name: "assignee", type: "person" }
   ],
-  defaultColumns: ["title", "ticket_type", "ticket_status", "ticket_priority", "start_date", "due_date"],
+  defaultColumns: ["query_type", "ticket_status", "ticket_priority", "start_date", "due_date"],
   skipFields: [],
   columnMappings: [
-    {"client_id" : "Customer Name"}
+    { "client_id": "Customer Name" }
   ],
   savedFilters: [],
   form: {
     initialValues: {
       ticket_id: null,
-      title: null,
       client_id: null,
       contact_no: null,
       description: null,
       query_type: null,
-      ticket_status: "205",
+      ticket_status: "206",
       ticket_priority: null,
       assignee: window.localStorage.getItem('_auth_id') || '',
       start_date: new Date().toISOString().split("T")[0],
@@ -71,19 +58,10 @@ export const ticketsModuleSchema = {
     },
     // Two-column layout matching the screenshot
     sections: [
-      {
-        columns: 1,
-        fields: [
-          {
-            name: "title",
-            label: "Title",
-            type: "text",
-            required: true,
-            placeholder: "Enter Title",
-            gridSpan: 12,
-          }, 
-        ],
-      },
+      // {
+      //   columns: 
+      // }
+      // ,
       {
         columns: 1,
         fields: [
@@ -93,7 +71,7 @@ export const ticketsModuleSchema = {
             type: "smartSelectInput",
             required: true,
             id: "client_id",
-            gridSpan: 6,
+            gridSpan: 12,
             readOnlyWhen: (values) => Boolean(values.ticket_id),
             config: {
               type: "customer",
@@ -105,25 +83,28 @@ export const ticketsModuleSchema = {
               getLabel: (item) => item.name || "Unnamed Client",
             },
           },
+        ],
+      },
+      {
+        columns: 2,
+        fields: [
           {
-            name: "ticket_status",
-            label: "Ticket Status",
-            type: "smartSelect",
-            id: "ticket_status",
+            name: "contact_person",
+            label: "Contact Person",
+            type: "text",
+            placeholder: "Enter Contact Person Name",
             gridSpan: 6,
-            config: {
-              apiUrl: "/system/searchSlugList",
-              tableName: "categories",
-              selectFields: "category_id,categoryName",
-              searchField: "categoryName",
-              slug: 'ticket_status',
-              status: 'active',
-              labelKey: "categoryName",
-              valueKey: "category_id",
-              placeholder: "Select Ticket Status",
-              multi: false,
-            },
-            visibleWhen: (values) => Boolean(values.ticket_id),
+            readOnlyWhen: (values) => Boolean(values.ticket_id),
+            required: true,
+          },
+          {
+            name: "contact_no",
+            label: "Contact Number",
+            type: "text",
+            required: true,
+            placeholder: "+1 (555) 000-0000",
+            gridSpan: 6,
+            readOnlyWhen: (values) => Boolean(values.ticket_id),
           },
         ],
       },
@@ -131,49 +112,12 @@ export const ticketsModuleSchema = {
         columns: 3,
         fields: [
           {
-            name: "assignee",
-            label: "Assigned To",
-            type: "smartSelect",
-            required: false,
-            id: "assignee",
-            gridSpan: 6,
-            config: {
-              apiUrl: "/system/searchList",
-              tableName: "admin",
-              selectFields: "adminID,name",
-              searchField: "name",
-              labelKey: "name",
-              valueKey: "adminID",
-              placeholder: "Select Assignee",
-              multi: false
-            }
-          },
-          {
-            name: "contact_no",
-            label: "Contact Number",
-            type: "text",
-            placeholder: "+1 (555) 000-0000",
-            gridSpan: 6,
-            readOnlyWhen: (values) => Boolean(values.client_id),
-          },
-        ],
-      },
-      {
-        columns: 2,
-        fields: [
-          { name: "start_date", label: "Start Date", type: "date", placeholder: "Select a date", gridSpan: 6 },
-          { name: "due_date", label: "Due Date", type: "date", placeholder: "Select a date", gridSpan: 6 },
-        ],
-      },
-      {
-        columns: 2,
-        fields: [
-          {
             name: "query_type",
             label: "Query Type",
             type: "smartSelect",
             id: "query_type",
             gridSpan: 6,
+            required: true,
             config: {
               apiUrl: "/system/searchSlugList",
               tableName: "categories",
@@ -209,30 +153,87 @@ export const ticketsModuleSchema = {
         ],
       },
       {
+        columns: 3,
+        fields: [
+          { name: "start_date", label: "Start Date", type: "date", placeholder: "Select a date", gridSpan: 6 },
+          {
+            name: "assignee",
+            label: "Assigned To",
+            type: "smartSelect",
+            required: true,
+            id: "assignee",
+            gridSpan: 6,
+            config: {
+              apiUrl: "/system/searchList",
+              tableName: "admin",
+              selectFields: "adminID,name",
+              searchField: "name",
+              labelKey: "name",
+              valueKey: "adminID",
+              placeholder: "Select Assignee",
+              multi: false
+            }
+          },
+        ],
+      },
+      {
+        columns: 2,
+        fields: [
+          { name: "due_date", label: "Due Date", type: "date", required: true, placeholder: "Select a date", gridSpan: 6 },
+          {
+            name: "ticket_status",
+            label: "Ticket Status",
+            type: "smartSelect",
+            id: "ticket_status",
+            gridSpan: 6,
+            config: {
+              apiUrl: "/system/searchSlugList",
+              tableName: "categories",
+              selectFields: "category_id,categoryName",
+              searchField: "categoryName",
+              slug: 'ticket_status',
+              status: 'active',
+              labelKey: "categoryName",
+              valueKey: "category_id",
+              placeholder: "Select Ticket Status",
+              multi: false,
+            },
+            visibleWhen: (values) => Boolean(values.ticket_id),
+          },
+        ],
+      },
+      {
+        columns: 2,
+        fields: [
+        ],
+      },
+      {
         columns: 1,
         fields: [
-          { name: "description", label: "Description", type: "editor", placeholder: "Provide details about the ticket...", gridSpan: 12 },
+          { name: "description", required: true, label: "Description", type: "editor", placeholder: "Provide details about the ticket...", gridSpan: 12 },
         ]
       },
     ],
   },
   validationSchema: z.object({
     client_id: z.coerce.number().min(1, "Customer is Required!"),
-    title: z.string().optional(),
-    description: z.string().optional(),
-    contact_no: z.string().trim().regex(/^[6-9]\d{9}$/, "Enter valid 10-digit mobile number").optional().or(z.literal("")),
-    start_date: z.string().optional(),
-    due_date: z.string().optional(),
-    ticket_type: z.any().optional(),
-    ticket_status: z.any().optional(),
-    ticket_priority: z.any().optional(),
-    status: z.string().default("active"),
-  }),
+    description: z.string({ required_error: "Description is Required!" }).nullable().transform(v => v ?? "").pipe(z.string().trim().min(1, "Description is Required!")),
+    contact_person: z.string({ required_error: "Contact person name required" }).optional().transform(v => v ?? "").pipe(z.string().trim().min(1, "Contact person name required")),
+    contact_no: z.string().nullable().optional().transform(v => v ?? "").refine(v => v === "" || /^[6-9]\d{9}$/.test(v), "Enter valid 10-digit mobile number"),
+    start_date: z.coerce.date({ required_error: "Start date is Required!" }),
+    due_date: z.coerce.date({ required_error: "Due date is Required!" }),
+    query_type: z.coerce.number().min(1, "Query type is Required!"),
+    ticket_status: z.coerce.number().min(1, "Ticket status is Required!"),
+    ticket_priority: z.coerce.number().min(1, "Ticket priority is Required!"),
+    status: z.string().default("active")
+  })
+  .refine((data) => data.due_date >= data.start_date, { message: "Due date must be after Start date", path: ["due_date"] })
 };
 
 export const ticketsFallbackColumns = [
   ...FIXED_TABLE_COLUMNS,
   ...buildFallbackColumnsFromKeys(ticketsModuleSchema.defaultColumns, {
     columnMappings: ticketsModuleSchema.columnMappings,
+    tableCellConfig: ticketsModuleSchema.tableCellConfig
   }),
 ];

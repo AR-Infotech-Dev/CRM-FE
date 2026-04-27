@@ -1,39 +1,42 @@
 import { toast } from "react-toastify";
 import { useEffect, useMemo, useState } from "react";
+
 import { makeRequest } from "../../api/httpClient";
 import { useModuleFilters } from "../../store/hooks";
 import { defaultSortConfig, getNextSortConfig } from "../../utils/sorting";
 import {
   buildFilterFieldsFromStructure,
   buildTableColumnsFromStructure,
-  getDefinitions
+  getDefinitions,
 } from "../../utils/moduleStructure";
+
 import ModuleControls from "../shared/ModuleControls";
 import ModulePageLayout from "../shared/ModulePageLayout";
 import ModulePagination from "../shared/ModulePagination";
-import DynamicFilter from "../../components/DynamicFilter";
-import UserForm from "./components/UserForm";
-import ResizableTable from "../../components/table/ResizableTable";
-import { usersFallbackColumns, usersModuleSchema } from "./data/module.schema";
 
-function UsersModulePage({ menuID }) {
-  const resolvedMenuID = menuID || usersModuleSchema.menuID || null;
+import DynamicFilter from "../../components/DynamicFilter";
+import ResizableTable from "../../components/table/ResizableTable";
+
+import CategoryForm from "./components/CategoryForm";
+import { categoryFallbackColumns, categoryModuleSchema } from "./data/module.schema";
+
+function CategoryModulePage({ menuID }) {
+  const resolvedMenuID = menuID || categoryModuleSchema.menuID || null;
+
   const [fields, setFields] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [categoryList, setCategoryList] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const [pagination, setPagination] = useState({});
   const [page, setPage] = useState(1);
-  const [userList, setUserList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedRowIds, setSelectedRowIds] = useState([]);
   const [deleting, setDeleting] = useState(false);
-  const {
-    filterState,
-    setSearchText,
-    applyFilterPayload,
-    setSort,
-    clearFilters,
-  } = useModuleFilters("user-master", userList);
+
+  const { filterState, setSearchText, applyFilterPayload, setSort, clearFilters } = useModuleFilters(
+    "category",
+    categoryList
+  );
 
   const sortConfig = {
     key: filterState.order_by || defaultSortConfig.key,
@@ -41,18 +44,18 @@ function UsersModulePage({ menuID }) {
   };
 
   const columnOptions = {
-    skipFields: usersModuleSchema.skipFields,
-    columnMappings: usersModuleSchema.columnMappings,
-    tableCellConfig: usersModuleSchema.tableCellConfig,
+    skipFields: categoryModuleSchema.skipFields,
+    columnMappings: categoryModuleSchema.columnMappings,
+    tableCellConfig: categoryModuleSchema.tableCellConfig,
   };
 
   const resolvedColumns = useMemo(
-    () => buildTableColumnsFromStructure(fields, usersFallbackColumns, columnOptions),
+    () => buildTableColumnsFromStructure(fields, categoryFallbackColumns, columnOptions),
     [fields]
   );
 
   const defaultVisibleColumnKeys = useMemo(
-    () => usersFallbackColumns.map((column) => column.key),
+    () => categoryFallbackColumns.map((column) => column.key),
     []
   );
 
@@ -60,9 +63,8 @@ function UsersModulePage({ menuID }) {
     () =>
       buildFilterFieldsFromStructure(
         fields,
-        usersModuleSchema.defaultColumns.map((key) => ({
-          label:
-            usersFallbackColumns.find((column) => column.key === key)?.label || key,
+        categoryModuleSchema.defaultColumns.map((key) => ({
+          label: categoryFallbackColumns.find((column) => column.key === key)?.label || key,
           value: key,
           type: "text",
         })),
@@ -71,11 +73,11 @@ function UsersModulePage({ menuID }) {
     [fields]
   );
 
-  const getUserList = async () => {
+  const getCategoryList = async () => {
     setLoading(true);
-    const res = await makeRequest(usersModuleSchema.api.list, {
+
+    const res = await makeRequest(categoryModuleSchema.api.list, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: {
         status: "active",
         page,
@@ -85,17 +87,29 @@ function UsersModulePage({ menuID }) {
         order_by: filterState.order_by,
       },
     });
+
     setLoading(false);
 
     if (res.success) {
-      setSelectedUser(null);
-      setUserList(res.data || []);
+      setCategoryList(res.data || []);
       setPagination(res.pagination || {});
       setSelectedRowIds([]);
       return;
     }
 
-    toast.error(res?.message || "Error while fetching users");
+    toast.error(res?.message || "Error while fetching categories");
+  };
+
+  const getColumnList = async () => {
+    if (!resolvedMenuID) {
+      setFields([]);
+      return;
+    }
+
+    const res = await getDefinitions(resolvedMenuID);
+    if (res?.success) {
+      setFields(res.data || []);
+    }
   };
 
   const handleToggleRow = (rowId, checked) => {
@@ -110,52 +124,42 @@ function UsersModulePage({ menuID }) {
       return;
     }
 
-    setSelectedRowIds(userList.map((row) => row?._id ?? row?.id ?? row?.adminID).filter(Boolean));
+    setSelectedRowIds(categoryList.map((row) => row?.category_id ?? row?.id).filter(Boolean));
   };
 
   const handleDeleteSelected = async () => {
     if (!selectedRowIds.length) {
-      toast.error("Please select at least one user to delete.");
+      toast.error("Please select at least one category.");
       return;
     }
 
     setDeleting(true);
-    const res = await makeRequest(usersModuleSchema.api.delete, {
+
+    const res = await makeRequest(categoryModuleSchema.api.delete, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: {
-        action:'delete',
+        action: "delete",
         ids: selectedRowIds,
       },
     });
+
     setDeleting(false);
 
     if (res.success) {
-      toast.success(res?.message || "Selected users deleted successfully.");
-      await getUserList();
+      toast.success(res?.message || "Categories deleted successfully.");
+      await getCategoryList();
       return;
     }
 
-    toast.error(res?.message || "Error while deleting users");
-  };
-
-  const getColumnList = async () => {
-    const res = await getDefinitions(resolvedMenuID);
-    if (res.success) {
-      setFields(res.data || []);
-      return;
-    }
-    toast.error(res?.message || "Error while fetching model fields");
+    toast.error(res?.message || "Error while deleting categories");
   };
 
   useEffect(() => {
     getColumnList();
-    console.log('here : ');
-    console.log(fields);
   }, [resolvedMenuID]);
 
   useEffect(() => {
-    getUserList();
+    getCategoryList();
   }, [page, filterState.searchText, filterState.order, filterState.order_by, JSON.stringify(filterState.filters)]);
 
   useEffect(() => {
@@ -167,30 +171,30 @@ function UsersModulePage({ menuID }) {
   return (
     <>
       <ModulePageLayout
-        title={usersModuleSchema.title}
-        description={usersModuleSchema.description}
+        title={categoryModuleSchema.title}
+        description={categoryModuleSchema.description}
         controls={
           <ModuleControls
             loading={loading}
-            onRefresh={getUserList}
+            onRefresh={getCategoryList}
             onCreate={() => {
-              setSelectedUser(null);
+              setSelectedCategory(null);
               setIsFlyoutOpen(true);
             }}
             onDeleteSelected={handleDeleteSelected}
-            showDelete={selectedRowIds.length !== 0}
+            showDelete={selectedRowIds.length > 0}
             deleteDisabled={deleting || loading || selectedRowIds.length === 0}
-            deleteLabel={`Delete Selected${selectedRowIds.length ? ` (${selectedRowIds.length})` : ""}`}
             deleting={deleting}
+            createLabel="Add Category"
             filter={
               <DynamicFilter
                 fields={resolvedFilterFields}
-                savedFilters={usersModuleSchema.savedFilters}
+                savedFilters={categoryModuleSchema.savedFilters}
                 onSearch={setSearchText}
                 onApplyFilters={applyFilterPayload}
-                onSaveFilter={() => { }}
-                onDeleteFilter={() => { }}
-                onSelectSavedFilter={() => { }}
+                onSaveFilter={() => {}}
+                onDeleteFilter={() => {}}
+                onSelectSavedFilter={() => {}}
                 onClearFilters={clearFilters}
               />
             }
@@ -200,8 +204,8 @@ function UsersModulePage({ menuID }) {
           <ResizableTable
             loading={loading}
             columns={resolvedColumns}
-            rows={userList}
-            storageKey="users-module-column-widths"
+            rows={categoryList}
+            storageKey="category-module-column-widths"
             defaultVisibleColumnKeys={defaultVisibleColumnKeys}
             sortConfig={sortConfig}
             onSortChange={(columnKey) => {
@@ -214,8 +218,8 @@ function UsersModulePage({ menuID }) {
                 order: nextSort.direction.toUpperCase(),
               });
             }}
-            editRow={(user) => {
-              setSelectedUser(user);
+            editRow={(category) => {
+              setSelectedCategory(category);
               setIsFlyoutOpen(true);
             }}
             selectedRowIds={selectedRowIds}
@@ -225,14 +229,18 @@ function UsersModulePage({ menuID }) {
         }
         footer={<ModulePagination pagination={pagination} onPageChange={setPage} />}
       />
-      <UserForm
+
+      <CategoryForm
         isOpen={isFlyoutOpen}
-        onClose={() => setIsFlyoutOpen(false)}
-        selectedUser={selectedUser}
-        onAfterSave={getUserList}
+        onClose={() => {
+          setIsFlyoutOpen(false);
+          setSelectedCategory(null);
+        }}
+        selectedCategory={selectedCategory}
+        onAfterSave={getCategoryList}
       />
     </>
   );
 }
 
-export default UsersModulePage;
+export default CategoryModulePage;

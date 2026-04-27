@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from "react";
 import { X, PhoneCall, PhoneOutgoing, CheckCheck } from "lucide-react";
 import { formatDate } from "../../../utils/common";
 import { makeRequest } from "../../../api/httpClient";
-function ClientHistory({ client = {}, CLIENT_HISTORY_ITEMS }) {
-
+function ClientHistory({ openedTiket = null, client = {}, CLIENT_HISTORY_ITEMS }) {
     const [ticketList, setTicketList] = useState([]);
     const hasClient = Object.keys(client).length > 0;
     const { customer_id, name, created_date } = client;
-    const displayName = name || (customer_id ? `Client #${customer_id}` : "Client");
+    const displayName =
+        name || (customer_id ? `Client #${customer_id}` : "Client");
 
     const getClientsTicket = async () => {
         try {
@@ -16,7 +16,7 @@ function ClientHistory({ client = {}, CLIENT_HISTORY_ITEMS }) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     client_id: customer_id,
-                    getAll: "Y"
+                    getAll: "Y",
                 }),
             });
 
@@ -29,12 +29,12 @@ function ClientHistory({ client = {}, CLIENT_HISTORY_ITEMS }) {
             console.error("Failed to fetch tickets:", error);
             setTicketList([]);
         }
-    }
+    };
 
     useEffect(() => {
         if (!customer_id) return;
         getClientsTicket();
-    }, [customer_id])
+    }, [customer_id]);
 
     if (!hasClient) {
         return (
@@ -54,7 +54,9 @@ function ClientHistory({ client = {}, CLIENT_HISTORY_ITEMS }) {
                     </div>
 
                     <div>
-                        <h3 className="text-sm font-semibold text-slate-800">{displayName}</h3>
+                        <h3 className="text-sm font-semibold text-slate-800">
+                            {displayName}
+                        </h3>
                         <p className="text-xs text-slate-500 mt-0.5">
                             Enterprise Client • San Francisco, CA
                         </p>
@@ -85,13 +87,16 @@ function ClientHistory({ client = {}, CLIENT_HISTORY_ITEMS }) {
             </div>
 
             <div className="histories ticket-scroll-pane px-2 space-y-2 mt-2">
-                {ticketList.map((item) => (
-                    <article key={item.ticket_id} className="rounded-sm border border-slate-200 bg-white px-4 py-2 shadow-sm">
+                {ticketList.filter((item) => item.ticket_id !== openedTiket).map((item) => (
+                    <article key={item.ticket_id} className="relative rounded-sm border border-slate-200 bg-white  px-4 py-2 shadow-sm" >
+                        <span className={`absolute top-2 right-2 rounded-full text-[${item.status_color}] px-2.5 py-0.5 text-[0.55rem] shadow-sm font-medium`}>
+                            {item?.ticket_status} 
+                        </span>
                         <div className="flex items-center justify-between gap-3">
-                            <h4 className="text-xs font-semibold text-slate-800">{item.title}</h4>
-                            <span className="rounded-full bg-slate-100 text-xs px-2.5 py-0.5 text-[0.55rem] font-medium text-slate-500">
-                                {item?.ticket_status}
-                            </span>
+                            <h4 className=" font-semibold text-slate-800">
+                                {item.ticket_no && <span className="mr-2.5 text-orange-400 text-[12px]">{item.ticket_no} <br /></span>} <span className=" text-red-300 text-[11px]"> Query Type : {item.query_type}</span>
+                                <span className="text-[13px] font-semibold text-slate-500" dangerouslySetInnerHTML={{ __html: item.description }} ></span>
+                            </h4>
                         </div>
                         <p className="mt-1 text-sm text-slate-600">{item?.title}</p>
                     </article>
@@ -100,4 +105,4 @@ function ClientHistory({ client = {}, CLIENT_HISTORY_ITEMS }) {
         </div>
     );
 }
-export default ClientHistory
+export default ClientHistory;

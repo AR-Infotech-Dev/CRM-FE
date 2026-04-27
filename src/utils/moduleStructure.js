@@ -23,38 +23,81 @@ function buildLabelMap(columnMappings = []) {
   }, {});
 }
 
-function inferCellType(fieldKey, fieldType) {
+function normalizeCellDisplayConfig(config = {}) {
+  const key =
+    config.key ||
+    config.column_name ||
+    config.columnName ||
+    config.field ||
+    "";
+
+  const type = String(config.type || "text").trim();
+
+  const colorField =
+    config.colorField ||
+    config.color_field ||
+    config.color_key ||
+    "";
+
+  return {
+    key: String(key).trim(),
+    type,
+    colorField: String(colorField || "").trim(),
+  };
+}
+
+function buildCellDisplayMap(configs = []) {
+  return configs.reduce((accumulator, config) => {
+    const normalized = normalizeCellDisplayConfig(config);
+
+    if (normalized.key) {
+      accumulator[normalizeKey(normalized.key)] = normalized;
+    }
+
+    return accumulator;
+  }, {});
+}
+
+function inferCellType(fieldKey, fieldType, cellDisplayMap = {}) {
   const normalizedKey = String(fieldKey || "").toLowerCase();
   const normalizedType = String(fieldType || "").toLowerCase();
+  const matched = cellDisplayMap[normalizeKey(fieldKey)];
+
+  if (matched?.type) {
+    return {
+      type: matched.type,
+      colorField: matched.colorField || "",
+    };
+  }
 
   if (normalizedKey.includes("status")) {
-    return "status";
+    return { type: "status", colorField: "" };
   }
 
   if (normalizedKey.includes("name")) {
-    return "person";
+    return { type: "person", colorField: "" };
   }
 
   if (normalizedKey.includes("email") || normalizedKey.includes("link")) {
-    return "clip";
+    return { type: "clip", colorField: "" };
   }
 
   if (
     normalizedKey.includes("role") ||
     normalizedKey.includes("type")
   ) {
-    return "tag";
+    return { type: "tag", colorField: "" };
   }
 
   if (
     normalizedKey.includes("department") ||
     normalizedKey.includes("module")
   ) {
-    return "dotText";
+    return { type: "dotText", colorField: "" };
   }
 
   if (normalizedType === "textarea" || normalizedType === "editor") {
-    return "clip";
+    return { type: "clip", colorField: "" };
   }
 
   return undefined;
@@ -90,19 +133,35 @@ function getFieldType(field) {
 
 export function buildFallbackColumnsFromKeys(keys = [], options = {}) {
   const labelMap = buildLabelMap(options.columnMappings);
+  const cellDisplayMap = buildCellDisplayMap(
+    options.tableCellConfig || options.customCelltypes || []
+  );
 
-  return keys.map((key) => ({
-    key,
-    label: getFieldLabel({}, key, labelMap),
-    width: 180,
-    minWidth: 120,
-    cellType: inferCellType(key, "text"),
-  }));
+  return keys.map((key) => {
+    const cellConfig = inferCellType(
+      key,
+      "text",
+      cellDisplayMap
+    );
+
+    return {
+      key,
+      label: getFieldLabel({}, key, labelMap),
+      width: 180,
+      minWidth: 120,
+      cellType: cellConfig?.type || 'text',
+      colorField: cellConfig?.colorField || "",
+    }
+  }
+  );
 }
 
 export function buildTableColumnsFromStructure(fields = [], fallbackColumns = [], options = {}) {
   const skipFieldSet = new Set((options.skipFields || []).map((field) => normalizeKey(field)));
   const labelMap = buildLabelMap(options.columnMappings);
+  const cellDisplayMap = buildCellDisplayMap(
+    options.tableCellConfig || options.customCelltypes || []
+  );
   const fixedColumns = fallbackColumns.filter(
     (column) => column.checkbox || column.className === "icon-col"
   );
@@ -115,12 +174,15 @@ export function buildTableColumnsFromStructure(fields = [], fallbackColumns = []
       }
 
       const type = getFieldType(field);
+      const cellConfig = inferCellType(key, type, cellDisplayMap);
+
       return {
         key,
         label: getFieldLabel(field, key, labelMap),
         width: 180,
         minWidth: 120,
-        cellType: inferCellType(key, type),
+        cellType: cellConfig?.type || "text",
+        colorField: cellConfig?.colorField || "",
       };
     })
     .filter(Boolean);

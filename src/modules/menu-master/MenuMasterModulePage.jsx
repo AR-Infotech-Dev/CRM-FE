@@ -55,6 +55,7 @@ function MenuModulePage({ menuID }) {
   const columnOptions = {
     skipFields: menuMasterSchema.skipFields,
     columnMappings: menuMasterSchema.columnMappings,
+    tableCellConfig: menuMasterSchema.tableCellConfig,
   };
 
   const resolvedColumns = useMemo(

@@ -70,7 +70,7 @@ function TopBar({ onLogout }) {
             <span className="avatar-count">+4</span>
           </div>
         </div> */}
-        {/* <button className="top-link accent">Share</button> */}
+        {/* <button classNa me="top-link accent">Share</button> */}
         <button className="top-link flex gap-2"
           onClick={handleLogout}
           disabled={isLoggingOut}

@@ -28,7 +28,7 @@ function TimelineItem({ item, last }) {
                     </span>
                 </div>
 
-                <div className="rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 leading-6 shadow-inner">
+                <div className="rounded-md  border-l-4 border-l-blue-100 bg-white px-4 py-3 text-sm text-slate-600 leading-6 shadow-inner">
                     {getMessage(item)}
                 </div>
             </div>

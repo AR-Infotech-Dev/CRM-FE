@@ -22,7 +22,7 @@
   height: calc(100vh - var(--topbar-height));
   max-height: calc(100vh - var(--topbar-height));
   background: #ffffff;
-  box-shadow: -14px 0 36px rgba(33, 47, 86, 0.14);
+  box-shadow: -14px 0 36px var(--shadow-strong);
   overflow: hidden;
 }
 
@@ -92,7 +92,7 @@
   min-height: 35px;
   padding: 0 24px 0 36px;
   background: rgba(255, 255, 255, 0.98);
-  border-bottom: 1px solid #dfe3eb;
+  border-bottom: 1px solid var(--border-soft);
 }
 
 .ws_container {
@@ -104,7 +104,7 @@
 
 .page_title {
   margin: 0;
-  color: #394861;
+  color: var(--dark-primary);
   font-size: 16px;
   font-weight: 500;
 }
@@ -195,9 +195,9 @@
 
 .form-control:focus,
 .form-shell:focus-within {
-  border-color: #8cb5ff;
+  border-color: var(--primary-300);
   background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+  box-shadow: 0 0 0 3px rgba(19, 153, 234, 0.12);
 }
 
 .form-shell {
@@ -262,7 +262,7 @@
   gap: 10px;
   padding: 5px 24px;
   background: rgba(255, 255, 255, 0.98);
-  border-top: 1px solid #dfe3eb;
+  border-top: 1px solid var(--border-soft);
 }
 
 .ticket-drawer-layout {
@@ -289,7 +289,7 @@
 
 .ticket-scroll-pane {
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-color: var(--primary-200) transparent;
 }
 
 .ticket-scroll-pane::-webkit-scrollbar {
@@ -302,12 +302,12 @@
 }
 
 .ticket-scroll-pane::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--primary-200);
   border-radius: 999px;
 }
 
 .ticket-scroll-pane::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--primary-400);
 }
 
 .client-history-panel {
@@ -328,12 +328,12 @@
 .ql-container {
   min-height: 150px;
   border-radius: 0 0 0px 0px;
-  border-color: #394861;
+  border-color: var(--border-strong);
 }
 
 .ql-toolbar {
   border-radius: 0px 0px 0 0;
-  border-color: #394861;
+  border-color: var(--border-strong);
 }
 
 

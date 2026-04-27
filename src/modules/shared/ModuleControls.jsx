@@ -52,11 +52,11 @@ function ModuleControls({
             {createLabel}
           </ActionButton>
           <ActionButton onClick={onRefresh}>
-            {loading ? <Spinner /> : <RefreshCcw size={15} color="#bc50f7" />}
+            {loading ? <Spinner /> : <RefreshCcw size={15} color="var(--primary)" />}
           </ActionButton>
           {showDelete &&
             <ActionButton onClick={onDeleteSelected} disabled={deleteDisabled}>
-              {deleting ? <Spinner /> : <Trash2 size={15} color="#bc50f7" />}
+              {deleting ? <Spinner /> : <Trash2 size={15} color="var(--primary)" />}
               {/* {deleteLabel} */}
             </ActionButton>
           }

@@ -195,8 +195,6 @@ function UserForm({ isOpen, onClose, selectedUser, onAfterSave }) {
 
   const handleSave = async () => {
     const result = usersModuleSchema.validationSchema.safeParse(formData);
-    console.log(result,' sas');
-    
 
     if (result.success == false) {
       const newErrors = {};
@@ -230,7 +228,7 @@ function UserForm({ isOpen, onClose, selectedUser, onAfterSave }) {
 
       if (res.success) {
         toast.success(
-          res?.msg ||
+          res?.message||
           `User ${mode === "create" ? "created" : "updated"} successfully`
         );
 
@@ -240,7 +238,7 @@ function UserForm({ isOpen, onClose, selectedUser, onAfterSave }) {
         return;
       }
 
-      toast.error(res?.msg || "Something went wrong");
+      toast.error(res?.message || "Something went wrong");
     } catch (error) {
       toast.error(error.message || "Server error");
     } finally {
