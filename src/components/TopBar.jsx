@@ -12,6 +12,7 @@ import { useAuth } from "../auth/AuthProvider";
 import { useState } from "react";
 import Spinner from "./ui/Spinner";
 import { APP_NAME } from "../api/config";
+import NotificationBell from "./ui/NotificationBell";
 function TopBar({ onLogout }) {
   const [isLoggingOut, setLoggingOut] = useState(false)
   const handleLogout = async () => {
@@ -55,21 +56,6 @@ function TopBar({ onLogout }) {
       </div>
 
       <div className="topbar-right">
-        <button className="topbar-utility">
-          <Settings2 size={15} />
-        </button>
-        <button className="topbar-utility topbar-utility-bell">
-          <Bell size={15} />
-          <span className="topbar-notification-dot" />
-        </button>
-        {/* <div className="topbar-team">
-          <div className="avatars">
-            <span className="avatar peach">A</span>
-            <span className="avatar tan">R</span>
-            <span className="avatar rose">S</span>
-            <span className="avatar-count">+4</span>
-          </div>
-        </div> */}
         {/* <button classNa me="top-link accent">Share</button> */}
         <button className="top-link flex gap-2"
           onClick={handleLogout}
@@ -78,6 +64,7 @@ function TopBar({ onLogout }) {
           {isLoggingOut && <Spinner classNames={"mx-4"} />} 
           Logout
         </button>
+        <NotificationBell/>
         <button className="topbar-profile">
           <span className="topbar-profile-ring">WS</span>
           <ChevronDown size={14} />

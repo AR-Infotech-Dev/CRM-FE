@@ -6,6 +6,8 @@ const FIXED_TABLE_COLUMNS = [
   { key: "select", className: "check-col", checkbox: true, width: 42, minWidth: 42, resizable: false },
 ];
 
+const assignee = window.localStorage.getItem('_auth_id');
+
 export const ticketsModuleSchema = {
   title: "Tickets",
   description: "Manage Tickets, priorities, assignments, and project tracking from one place.",
@@ -48,7 +50,7 @@ export const ticketsModuleSchema = {
       query_type: null,
       ticket_status: "206",
       ticket_priority: null,
-      assignee: window.localStorage.getItem('_auth_id') || '',
+      assignee: assignee || null,
       start_date: new Date().toISOString().split("T")[0],
       due_date: null,
       company_id: null,
