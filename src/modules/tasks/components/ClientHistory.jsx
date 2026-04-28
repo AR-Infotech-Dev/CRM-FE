@@ -6,8 +6,7 @@ function ClientHistory({ openedTiket = null, client = {}, CLIENT_HISTORY_ITEMS }
     const [ticketList, setTicketList] = useState([]);
     const hasClient = Object.keys(client).length > 0;
     const { customer_id, name, created_date } = client;
-    const displayName =
-        name || (customer_id ? `Client #${customer_id}` : "Client");
+    const displayName = name || (customer_id ? `Client #${customer_id}` : "Client");
 
     const getClientsTicket = async () => {
         try {

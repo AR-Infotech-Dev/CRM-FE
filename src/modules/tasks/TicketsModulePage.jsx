@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { makeRequest } from "../../api/httpClient";
 import { useModuleFilters } from "../../store/hooks";
-
+import { useLocation } from "react-router-dom";
 import {
   defaultSortConfig,
   getNextSortConfig,
@@ -30,6 +30,7 @@ import {
 } from "./data/module.schema";
 
 function TicketModulePage({ menuID }) {
+  const location = useLocation();
   // ==================================================
   // STATES
   // ==================================================
@@ -84,6 +85,14 @@ function TicketModulePage({ menuID }) {
     "tickets",
     ticketList
   );
+
+  useEffect(() => {
+    const ticket = location.state?.openTicket;
+    if (ticket?.ticket_id) {
+      setSelectedTicket(ticket);
+      setIsFlyoutOpen(true);
+    }
+  }, [location.state]);
 
   // ==================================================
   // SORT CONFIG
@@ -271,7 +280,7 @@ function TicketModulePage({ menuID }) {
       <ModulePageLayout
         // title={ticketsModuleSchema.title}
         title='Tickets'
-        description= 'Tasks Modue'
+        description='Tasks Modue'
         // description=. {ticketsModuleSchema.description}
         controls={
           <ModuleControls

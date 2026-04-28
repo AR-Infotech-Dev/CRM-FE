@@ -11,28 +11,12 @@ import ClientHistory from "./ClientHistory";
 import TicketHistory from "./TicketHistory";
 import Comments from "./Comments";
 
-
-
 const TAB_ITEMS = [
   ["client", "Client History"],
   ["comments", "Comments"],
   ["history", "Ticket History"],
 ];
 
-const COMMENTS = [
-  {
-    key: "comment-1",
-    author: "Jordan Sterling",
-    meta: "2 hours ago",
-    text: "Investigating the API timeout reported by the client. Likely a gateway issue.",
-  },
-  {
-    key: "comment-2",
-    author: "Sarah Chen",
-    meta: "Yesterday, 4:30 PM",
-    text: "Client requested an update on the billing cycle. Handed off to accounting.",
-  },
-];
 
 const CALL_HISTORY_ITEMS = [
   {
@@ -85,7 +69,7 @@ function normalizeTaskData(ticket = {}) {
     ...ticketsModuleSchema.form.initialValues,
     ...ticket,
     // client_name: ticket?.client_name || ticket?.clientName || "",
-    title: ticket?.title || null,
+    // title: ticket?.title || null,
     description: ticket?.description || null,
     contact_no: ticket?.contact_no || null,
     start_date: ticket?.start_date
@@ -150,7 +134,10 @@ function TicketForm({ isOpen, onClose, selectedTicket, onAfterSave }) {
   const mode = selectedTicket ? "edit" : "create";
   const ticket_id = getTicketIdentifier(selectedTicket);
   const visibleTabs = mode === "edit" ? TAB_ITEMS : TAB_ITEMS.filter(([key]) => key === "client");
-
+  console.log('ticketsModuleSchema : ',ticketsModuleSchema.form.initialValues);
+  console.log('assignee : ',window.localStorage.getItem('_auth_id'));
+  console.log('formData : ',formData);
+  
   useEffect(() => {
     if (mode !== "edit" && tab !== "client") {
       setTab("client");
@@ -317,14 +304,6 @@ function TicketForm({ isOpen, onClose, selectedTicket, onAfterSave }) {
                     onObjectSelect={handleObjectSelect}
                     errors={errors}
                   />
-                  <ActionButton
-                    className={loading ? "bg-purple-200 cursor-not-allowed" : ""}
-                    disabled={loading || fetchingTicket}
-                    variant="flyoutSecondary"
-                    onClick={handleSave}
-                  >
-                    {loading || fetchingTicket ? <Spinner /> : null} Save
-                  </ActionButton>
                 </div>
                 <div className="col-span-12 flex min-h-60 min-w-0 flex-col overflow-hidden bg-slate-50 lg:col-span-6 xl:col-span-5">
                   <div className="border-b border-slate-200 bg-white px-4 py-2">
