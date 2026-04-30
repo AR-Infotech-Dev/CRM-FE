@@ -29,7 +29,7 @@ const FIELD_SPAN_CLASS = {
   12: "col-span-12",
 };
 
-function DynamicModuleForm({ sections = [], values = {}, onChange, onObjectSelect, errors = {} }) {
+function DynamicModuleForm({ sections = [], values = {}, onChange, onObjectSelect, errors = {} ,oldValues={}, mode=''}) {
   const getConditionalFlag = (field, key) => {
     const flag = field[key];
     return typeof flag === "function" ? Boolean(flag(values)) : Boolean(flag);
@@ -88,9 +88,10 @@ function DynamicModuleForm({ sections = [], values = {}, onChange, onObjectSelec
         <div key={`section-${sectionIndex}`} className={`mb-1 ${SECTION_COLUMN_CLASS[section.columns] || SECTION_COLUMN_CLASS[2]}`}>
           {section.fields.map((field) => {
             const isVisible = field.visibleWhen
-              ? field.visibleWhen(values)
+              ? field.visibleWhen(values, oldValues , mode)
               : true;
-
+            console.log("isvisible :" ,isVisible);
+            
             if (!isVisible) return null;
             const isDisabled = getConditionalFlag(field, "disabled") || getConditionalFlag(field, "disabledWhen");
             const isReadOnly =

@@ -279,5 +279,3 @@ export const usersFallbackColumns = [
     tableCellConfig: usersModuleSchema.tableCellConfig,
   }),
 ];
-
-console.log('usersFallbackColumns : ',usersFallbackColumns);

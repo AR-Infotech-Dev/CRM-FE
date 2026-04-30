@@ -2,7 +2,7 @@ import { Database, SearchX } from "lucide-react";
 
 function NoTableData({ colSpan = 1 }) {
   return (
-    <tr>
+    <tr className="w-full" style={{ width: '100%' }} >
       <td colSpan={colSpan} className="table-empty-cell">
         <div className="table-empty-state">
           <div className="table-empty-visual">

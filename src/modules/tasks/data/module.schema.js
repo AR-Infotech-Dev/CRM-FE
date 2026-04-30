@@ -48,7 +48,7 @@ export const ticketsModuleSchema = {
       contact_no: null,
       description: null,
       query_type: null,
-      ticket_status: "206",
+      ticket_status: "205",
       ticket_priority: null,
       assignee: assignee || null,
       start_date: new Date().toISOString().split("T")[0],
@@ -205,8 +205,21 @@ export const ticketsModuleSchema = {
         ],
       },
       {
-        columns: 2,
+        columns: 1,
         fields: [
+          {
+            name: "reason",
+            label: "Reason",
+            type: "text",
+            placeholder: "Enter reason",
+            gridSpan: 12,
+            required:true,
+            visibleWhen: (values, oldValues, mode) => mode === "edit" &&
+              (
+                String(values.assignee || "") !== String(oldValues.assignee || "") ||
+                String(values.due_date || "") !== String(oldValues.due_date || "")
+              ),
+          },
         ],
       },
       {
@@ -229,7 +242,7 @@ export const ticketsModuleSchema = {
     ticket_priority: z.coerce.number().min(1, "Ticket priority is Required!"),
     status: z.string().default("active")
   })
-  .refine((data) => data.due_date >= data.start_date, { message: "Due date must be after Start date", path: ["due_date"] })
+    .refine((data) => data.due_date >= data.start_date, { message: "Due date must be after Start date", path: ["due_date"] })
 };
 
 export const ticketsFallbackColumns = [
