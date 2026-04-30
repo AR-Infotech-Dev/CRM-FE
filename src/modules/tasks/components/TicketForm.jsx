@@ -128,15 +128,13 @@ function TicketForm({ isOpen, onClose, selectedTicket, onAfterSave }) {
   const [loading, setLoading] = useState(false);
   const [fetchingTicket, setFetchingTicket] = useState(false);
   const [formData, setFormData] = useState(ticketsModuleSchema.form.initialValues);
+  const [oldformData, setOldFormData] = useState(ticketsModuleSchema.form.initialValues);
   const [selectedCustomer, setSelectedCustomer] = useState({});
   const [errors, setErrors] = useState({});
   const [tab, setTab] = useState("client");
   const mode = selectedTicket ? "edit" : "create";
   const ticket_id = getTicketIdentifier(selectedTicket);
   const visibleTabs = mode === "edit" ? TAB_ITEMS : TAB_ITEMS.filter(([key]) => key === "client");
-  console.log('ticketsModuleSchema : ',ticketsModuleSchema.form.initialValues);
-  console.log('assignee : ',window.localStorage.getItem('_auth_id'));
-  console.log('formData : ',formData);
   
   useEffect(() => {
     if (mode !== "edit" && tab !== "client") {
@@ -155,10 +153,12 @@ function TicketForm({ isOpen, onClose, selectedTicket, onAfterSave }) {
         });
         const ticketData = res?.data || selectedTicket;
         setFormData(normalizeTaskData(ticketData));
+        setOldFormData(normalizeTaskData(ticketData));
         setSelectedCustomer(normalizeCustomerData(ticketData));
       } catch (error) {
         toast.error("Unable to fetch ticket details");
         setFormData(normalizeTaskData(selectedTicket));
+        setOldFormData(normalizeTaskData(selectedTicket));
         setSelectedCustomer(normalizeCustomerData(selectedTicket));
       } finally {
         setFetchingTicket(false);
@@ -171,6 +171,7 @@ function TicketForm({ isOpen, onClose, selectedTicket, onAfterSave }) {
     }
 
     setFormData(ticketsModuleSchema.form.initialValues);
+    setOldFormData(ticketsModuleSchema.form.initialValues);
     setSelectedCustomer({});
     setErrors({});
     setTab("client");
@@ -212,7 +213,6 @@ function TicketForm({ isOpen, onClose, selectedTicket, onAfterSave }) {
     };
 
     const result = ticketsModuleSchema.validationSchema.safeParse(payload);
-    console.log("result : ", result);
 
     if (!result.success) {
       const newErrors = {};
@@ -258,12 +258,10 @@ function TicketForm({ isOpen, onClose, selectedTicket, onAfterSave }) {
       setLoading(false);
     }
   };
-
   return (
     <FlyoutPanel
       isOpen={isOpen}
       onClose={handleClose}
-
       title={selectedTicket ? "Edit Ticket" : "Create Ticket"}
       closeButton={
         <button className="flyout-close" onClick={handleClose} aria-label="Close panel">
@@ -303,6 +301,8 @@ function TicketForm({ isOpen, onClose, selectedTicket, onAfterSave }) {
                     onChange={handleChange}
                     onObjectSelect={handleObjectSelect}
                     errors={errors}
+                    mode={mode}
+                    oldValues={oldformData}
                   />
                 </div>
                 <div className="col-span-12 flex min-h-60 min-w-0 flex-col overflow-hidden bg-slate-50 lg:col-span-6 xl:col-span-5">

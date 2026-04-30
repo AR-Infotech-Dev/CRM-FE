@@ -1,6 +1,7 @@
 import { Navigate, Route, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import Login from "../auth/Login";
+import Feedback from "../public/Feedback";
 
 function LoginRoute() {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ function LoginRoute() {
   if (authSession) {
     return <Navigate to="/users" replace />;
   }
+  
 
   return (
     <Login/>
@@ -95,8 +97,7 @@ export function getAuthRoutes() {
   return (
     <>
       <Route path="/login" element={<LoginRoute />} />
-      {/* <Route path="/forgot-password" element={<ForgotPasswordRoute />} />
-      <Route path="/verify-reset" element={<VerificationRoute />} /> */}
+      <Route path="/feedback/:ticket_id/:token" element={<Feedback />} />
     </>
   );
 }
