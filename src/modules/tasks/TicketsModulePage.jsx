@@ -21,6 +21,8 @@ import ModulePagination from "../shared/ModulePagination";
 
 import DynamicFilter from "../../components/DynamicFilter";
 import ResizableTable from "../../components/table/ResizableTable";
+import ActionButton from "../../components/ui/ActionButton";
+import KanbanBoard from "../../components/kanban/KanbanBoard";
 
 import TicketForm from "./components/TicketForm";
 
@@ -71,6 +73,8 @@ function TicketModulePage({ menuID }) {
 
   const [deleting, setDeleting] =
     useState(false);
+  const [viewMode, setViewMode] =
+    useState("table");
 
   // ==================================================
   // FILTERS
@@ -283,35 +287,52 @@ function TicketModulePage({ menuID }) {
         description='Tasks Modue'
         // description=. {ticketsModuleSchema.description}
         controls={
-          <ModuleControls
-            loading={loading}
-            onRefresh={getTicketList}
-            onCreate={() => {
-              setSelectedTicket(null);
-              setIsFlyoutOpen(true);
-            }}
-            onDeleteSelected={
-              handleDeleteSelected
-            }
-            showDelete={selectedRowIds.length > 0}
-            deleteDisabled={deleting || loading || selectedRowIds.length === 0}
-            deleteLabel={`Delete Selected${selectedRowIds.length ? ` (${selectedRowIds.length})` : ""}`}
-            deleting={deleting}
-            filter={
-              <DynamicFilter
-                fields={resolvedFilterFields}
-                savedFilters={ticketsModuleSchema.savedFilters}
-                onSearch={setSearchText}
-                onApplyFilters={applyFilterPayload}
-                onSaveFilter={() => { }}
-                onDeleteFilter={() => { }}
-                onSelectSavedFilter={() => { }}
-                onClearFilters={clearFilters}
-              />
-            }
-          />
+          <div className="flex flex-col gap-3">
+            <ModuleControls
+              loading={loading}
+              onRefresh={getTicketList}
+              onCreate={() => {
+                setSelectedTicket(null);
+                setIsFlyoutOpen(true);
+              }}
+              onDeleteSelected={
+                handleDeleteSelected
+              }
+              showDelete={selectedRowIds.length > 0}
+              deleteDisabled={deleting || loading || selectedRowIds.length === 0}
+              deleteLabel={`Delete Selected${selectedRowIds.length ? ` (${selectedRowIds.length})` : ""}`}
+              deleting={deleting}
+              filter={
+                <DynamicFilter
+                  fields={resolvedFilterFields}
+                  savedFilters={ticketsModuleSchema.savedFilters}
+                  onSearch={setSearchText}
+                  onApplyFilters={applyFilterPayload}
+                  onSaveFilter={() => { }}
+                  onDeleteFilter={() => { }}
+                  onSelectSavedFilter={() => { }}
+                  onClearFilters={clearFilters}
+                />
+              }
+            >
+              <div className="flex items-center justify-end gap-2">
+                <ActionButton
+                  variant={viewMode === "table" ? "ghostPrimary" : "ghost"}
+                  onClick={() => setViewMode("table")}
+                >
+                  Table
+                </ActionButton>
+                <ActionButton
+                  variant={viewMode === "kanban" ? "ghostPrimary" : "ghost"}
+                  onClick={() => setViewMode("kanban")}
+                >
+                  Kanban
+                </ActionButton>
+              </div>
+            </ModuleControls>
+          </div>
         }
-        table={
+        table={viewMode === "table" ? (
           <ResizableTable
             loading={loading}
             columns={resolvedColumns}
@@ -336,6 +357,18 @@ function TicketModulePage({ menuID }) {
             onToggleRow={handleToggleRow}
             onToggleAllRows={handleToggleAllRows}
           />
+        ) : (
+          <KanbanBoard
+            rows={ticketList}
+            config={ticketsModuleSchema.kanban}
+            loading={loading}
+            editRow={(ticket) => {
+              setSelectedTicket(ticket);
+              setIsFlyoutOpen(true);
+            }}
+            onAfterUpdate={getTicketList}
+          />
+        )
         }
         footer={
           <ModulePagination pagination={pagination} onPageChange={setPage} />

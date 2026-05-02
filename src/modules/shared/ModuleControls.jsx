@@ -22,7 +22,8 @@ function ModuleControls({
   selectedLabel = "4 Selected",
   resultsLabel = "120 Results",
   createLabel = "Add New",
-  filter
+  filter,
+  children
 }) {
   return (
     <div className="module-controls">
@@ -67,6 +68,7 @@ function ModuleControls({
           <ActionButton variant="icon">
             <MoreHorizontal size={18} />
           </ActionButton> */}
+          {children}
         </div>
       </div>
     </div>

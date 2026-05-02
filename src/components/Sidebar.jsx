@@ -183,6 +183,7 @@ import {
   Users,
   Ticket,
   LayoutGrid,
+  ContactRound,
   ShieldCheck,
   Building2,
   MenuSquare
@@ -201,6 +202,11 @@ const menus = [
     label: "Users",
     path: "/users",
     icon: Users,
+  },
+  {
+    label: "Customers",
+    path: "/customers",
+    icon: ContactRound,
   },
   {
     label: "Tickets",

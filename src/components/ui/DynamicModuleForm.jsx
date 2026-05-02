@@ -29,7 +29,7 @@ const FIELD_SPAN_CLASS = {
   12: "col-span-12",
 };
 
-function DynamicModuleForm({ sections = [], values = {}, onChange, onObjectSelect, errors = {} ,oldValues={}, mode=''}) {
+function DynamicModuleForm({ sections = [], values = {}, onChange, onObjectSelect, errors = {}, oldValues = {}, mode = '' }) {
   const getConditionalFlag = (field, key) => {
     const flag = field[key];
     return typeof flag === "function" ? Boolean(flag(values)) : Boolean(flag);
@@ -84,38 +84,49 @@ function DynamicModuleForm({ sections = [], values = {}, onChange, onObjectSelec
 
   return (
     <div className="space-y-5">
-      {sections.map((section, sectionIndex) => (
-        <div key={`section-${sectionIndex}`} className={`mb-1 ${SECTION_COLUMN_CLASS[section.columns] || SECTION_COLUMN_CLASS[2]}`}>
-          {section.fields.map((field) => {
-            const isVisible = field.visibleWhen
-              ? field.visibleWhen(values, oldValues , mode)
-              : true;
-            console.log("isvisible :" ,isVisible);
-            
-            if (!isVisible) return null;
-            const isDisabled = getConditionalFlag(field, "disabled") || getConditionalFlag(field, "disabledWhen");
-            const isReadOnly =
-              getConditionalFlag(field, "readOnly") ||
-              getConditionalFlag(field, "readonly") ||
-              getConditionalFlag(field, "readOnlyWhen") ||
-              getConditionalFlag(field, "readonlyWhen");
-            const resolvedField = {
-              ...field,
-              disabled: isDisabled,
-              readOnly: isReadOnly,
-            };
-            const sectionColumns = Number(section.columns) || 2;
-            const defaultSpan = Math.max(1, Math.floor(12 / sectionColumns));
-            const fieldSpan = Number(field.gridSpan || field.columns || defaultSpan);
-            
-            return (
-              <div key={field.name} className={`w-full ${FIELD_SPAN_CLASS[fieldSpan] || FIELD_SPAN_CLASS[defaultSpan]}`}>
-                {renderField(resolvedField)}
+      {sections.map((section, sectionIndex) => {
+        const Icon = section.icon; 
+        return (
+          <>
+            {section.title &&
+              <div className={`flex text-md font-semibold items-center mb-1 ${sectionIndex != 0 && "mt-4"}`}  >
+                {Icon && <Icon className="m1 mr-2" size={15} />}
+                <h4 className="">{section.title || ''}</h4>
               </div>
-            )
-          })}
-        </div>
-      ))}
+            }
+            <div key={`section-${sectionIndex}`} className={`mb-1 ${SECTION_COLUMN_CLASS[section.columns] || SECTION_COLUMN_CLASS[2]}`}>
+              {section.fields.map((field) => {
+                const isVisible = field.visibleWhen
+                  ? field.visibleWhen(values, oldValues, mode)
+                  : true;
+                console.log("isvisible :", isVisible);
+
+                if (!isVisible) return null;
+                const isDisabled = getConditionalFlag(field, "disabled") || getConditionalFlag(field, "disabledWhen");
+                const isReadOnly =
+                  getConditionalFlag(field, "readOnly") ||
+                  getConditionalFlag(field, "readonly") ||
+                  getConditionalFlag(field, "readOnlyWhen") ||
+                  getConditionalFlag(field, "readonlyWhen");
+                const resolvedField = {
+                  ...field,
+                  disabled: isDisabled,
+                  readOnly: isReadOnly,
+                };
+                const sectionColumns = Number(section.columns) || 2;
+                const defaultSpan = Math.max(1, Math.floor(12 / sectionColumns));
+                const fieldSpan = Number(field.gridSpan || field.columns || defaultSpan);
+
+                return (
+                  <div key={field.name} className={`w-full ${FIELD_SPAN_CLASS[fieldSpan] || FIELD_SPAN_CLASS[defaultSpan]}`}>
+                    {renderField(resolvedField)}
+                  </div>
+                )
+              })}
+            </div>
+          </>
+        )
+      })}
     </div>
   );
 }

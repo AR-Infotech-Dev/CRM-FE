@@ -39,7 +39,7 @@ function getSelectedLabel(field, value, selectedUser) {
   }
 
   if (field.name === "default_company") {
-    return selectedUser?.companyName || selectedUser?.default_company_name || selectedUser?.default_company || value;
+    return selectedUser?.company_name || selectedUser?.default_company_name || selectedUser?.default_company || value;
   }
 
   return value;

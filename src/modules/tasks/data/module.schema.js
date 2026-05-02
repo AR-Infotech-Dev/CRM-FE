@@ -35,6 +35,31 @@ export const ticketsModuleSchema = {
     { column_name: "ticket_priority", type: "tag", color_field: "priority_color" },
     // { column_name: "assignee", type: "person" }
   ],
+  kanban: {
+    enabled: true,
+    categoryParentSlug: "ticket_status",
+    categoryTableName: "categories",
+    categorySelectFields: "category_id,categoryName,cat_color",
+    categorySearchField: "categoryName",
+    categoryValueKey: "category_id",
+    categoryLabelKey: "categoryName",
+    categoryColorKey: "cat_color",
+    statusField: "ticket_status",
+    idField: "ticket_id",
+    titleField: "ticket_no",
+    updateApi: "/tickets/update_status",
+    updateMethod: "POST",
+    buildUpdateBody: (row, targetColumnId) => ({
+      ticket_status: targetColumnId,
+    }),
+    cardFields: [
+      { key: "client_id", label: "Client" },
+      { key: "contact_person", label: "Contact" },
+      { key: "query_type", label: "Type", type: "badge", colorField: "type_color" },
+      { key: "due_date", label: "Due", type: "date" },
+      { key: "ticket_priority", label: "Priority", type: "tag", colorField: "priority_color" },
+    ],
+  },
   defaultColumns: ["query_type", "ticket_status", "ticket_priority", "start_date", "due_date"],
   skipFields: [],
   columnMappings: [
