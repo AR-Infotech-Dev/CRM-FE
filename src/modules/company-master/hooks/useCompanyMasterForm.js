@@ -4,10 +4,14 @@ import { companyMasterSchema } from "../data/module.schema";
 import {
   getCompanyDetails,
   removeCompanyLogo,
+  removeHappyClientLogos,
+  removeCompanySignature,
   saveCompany,
   testCompanyMailConnection,
   testCompanyDBConnection,
-  uploadCompanyLogo
+  uploadCompanyLogo,
+  uploadHappyClientLogos,
+  uploadCompanySignature,
 } from "../data/companyMaster.service";
 import {
   buildMailConfigPayload,
@@ -15,6 +19,9 @@ import {
   getDBConnectionBadge,
   getEmailConnectionBadge,
   getLogoPathFromResponse,
+  getHappyClientLogosFromResponse,
+  getSignaturePathFromResponse,
+  getLogoUrl,
   MAIL_PROVIDER_DEFAULTS,
   normalizeCompanyData,
 } from "../utils/companyMaster.utils";
@@ -24,6 +31,8 @@ export const useCompanyMasterForm = ({ isOpen, onClose, selectedCompany, onAfter
   const [testingConnection, setTestingConnection] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [fetchingCompany, setFetchingCompany] = useState(false);
+  const [signatureRemoved, setSignatureRemoved] = useState(false);
+  const [happyClientLogosChanged, setHappyClientLogosChanged] = useState(false);
   const [formData, setFormData] = useState(companyMasterSchema.form.initialValues);
   const [errors, setErrors] = useState({});
 
@@ -40,6 +49,8 @@ export const useCompanyMasterForm = ({ isOpen, onClose, selectedCompany, onAfter
         setFetchingCompany(true);
         const res = await getCompanyDetails(companyId);
         setFormData(normalizeCompanyData(res?.data || selectedCompany));
+        setSignatureRemoved(false);
+        setHappyClientLogosChanged(false);
       } catch (error) {
         toast.error("Unable to fetch company details");
         setFormData(normalizeCompanyData(selectedCompany));
@@ -55,11 +66,15 @@ export const useCompanyMasterForm = ({ isOpen, onClose, selectedCompany, onAfter
 
     setFormData(companyMasterSchema.form.initialValues);
     setErrors({});
+    setSignatureRemoved(false);
+    setHappyClientLogosChanged(false);
   }, [selectedCompany, isOpen, companyId]);
 
   const handleClose = () => {
     setFormData(companyMasterSchema.form.initialValues);
     setErrors({});
+    setSignatureRemoved(false);
+    setHappyClientLogosChanged(false);
     onClose();
   };
 
@@ -68,8 +83,13 @@ export const useCompanyMasterForm = ({ isOpen, onClose, selectedCompany, onAfter
     setFormData((current) => ({
       ...current,
       [name]: value,
+      ...(name === "authority_sign" && !value ? { authority_sign_url: "" } : {}),
       ...(name === "mail_provider" ? (MAIL_PROVIDER_DEFAULTS[value] || {}) : {}),
     }));
+    if (name === "authority_sign") {
+      setSignatureRemoved(!value && Boolean(formData.authority_sign_url));
+    }
+    if (name === "happy_client_logos") setHappyClientLogosChanged(true);
   };
 
   const handleLogoUpload = async (event) => {
@@ -151,7 +171,15 @@ export const useCompanyMasterForm = ({ isOpen, onClose, selectedCompany, onAfter
   };
 
   const handleSave = async () => {
+    const signatureFile = formData.authority_sign instanceof File ? formData.authority_sign : null;
+    const happyClientLogoFiles = (Array.isArray(formData.happy_client_logos) ? formData.happy_client_logos : [])
+      .filter((file) => file instanceof File)
+      .slice(0, 5);
     const payload = { ...formData, ...buildMailConfigPayload(formData) };
+    delete payload.authority_sign;
+    delete payload.authority_sign_url;
+    delete payload.happy_client_logos;
+    delete payload.footer_logos;
     if (!validatePayload(payload)) return;
 
     try {
@@ -159,8 +187,56 @@ export const useCompanyMasterForm = ({ isOpen, onClose, selectedCompany, onAfter
       const res = await saveCompany({ mode, companyId, payload });
 
       if (res.success) {
+        const savedCompanyId = companyId || res?.data?.insertId || res?.data?.data?.insertId || res?.insertId;
+        if (!savedCompanyId) {
+          toast.error("Company was saved, but its ID was not returned for signature upload.");
+          return;
+        }
+
+        if (signatureFile) {
+          const signatureResponse = await uploadCompanySignature({ companyId: savedCompanyId, file: signatureFile });
+          if (!signatureResponse.success) {
+            toast.error(signatureResponse.message || "Company was saved, but signature upload failed.");
+            return;
+          }
+          const signaturePath = getSignaturePathFromResponse(signatureResponse);
+          setFormData((current) => ({ ...current, authority_sign_url: signaturePath, authority_sign: signaturePath ? { name: signaturePath.split("/").pop(), url: getLogoUrl(signaturePath), existing: true } : null }));
+        } else if (signatureRemoved && companyId) {
+          const removeResponse = await removeCompanySignature(companyId);
+          if (!removeResponse.success) {
+            toast.error(removeResponse.message || "Company was saved, but signature removal failed.");
+            return;
+          }
+        }
+
+        if (happyClientLogoFiles.length) {
+          const logosResponse = await uploadHappyClientLogos({ companyId: savedCompanyId, files: happyClientLogoFiles });
+          if (!logosResponse.success) {
+            toast.error(logosResponse.message || "Company was saved, but happy client logos upload failed.");
+            return;
+          }
+          const uploadedLogos = getHappyClientLogosFromResponse(logosResponse);
+          setFormData((current) => ({
+            ...current,
+            happy_client_logos: uploadedLogos.map((logo, index) => ({
+              name: logo.name || `Client ${index + 1}`,
+              path: logo.path || logo.url,
+              url: getLogoUrl(logo.path || logo.url),
+              existing: true,
+            })),
+          }));
+        } else if (happyClientLogosChanged && companyId) {
+          const removeLogosResponse = await removeHappyClientLogos(companyId);
+          if (!removeLogosResponse.success) {
+            toast.error(removeLogosResponse.message || "Company was saved, but happy client logos removal failed.");
+            return;
+          }
+        }
+
         toast.success(res?.message || `Company ${mode === "create" ? "created" : "updated"} successfully`);
         setFormData(companyMasterSchema.form.initialValues);
+        setSignatureRemoved(false);
+        setHappyClientLogosChanged(false);
         onClose();
         onAfterSave?.();
         return;

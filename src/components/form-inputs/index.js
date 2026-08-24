@@ -5,6 +5,7 @@ import RadioGroup from './RadioGroup';
 import RichTextEditor from './RichTextEditor';
 import Select from './Select';
 import SelectItem from './SelectItem' ;
+import FileUpload from './FileUpload';
 
 
 const components = {
@@ -15,6 +16,7 @@ const components = {
   editor: RichTextEditor,
   select: Select,
   selectItem: SelectItem,
+  file: FileUpload,
 };
 
 export default components

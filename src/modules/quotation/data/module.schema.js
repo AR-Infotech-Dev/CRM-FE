@@ -43,7 +43,7 @@ export const quotationsModuleSchema = {
     modelName: "quotations",
   },
   staticJoined: [],
-  defaultColumns: ["quotation_no", "is_revised_copy", "lead_id","customer_id", "quotation_date", "valid_until", "grand_total", "quotation_status", "created_by"],
+  defaultColumns: ["quotation_no", "is_revised_copy", "lead_id", "customer_id", "quotation_date", "valid_until", "grand_total", "quotation_status", "created_by"],
   skipFields: [
     "company_id",
     // "customer_id",
@@ -100,6 +100,7 @@ export const quotationsModuleSchema = {
       valid_until: "",
       timeframe: "",
       quotation_status: "draft",
+      scope_of_work: "",
       notes: "",
       terms: "",
       items: [],
@@ -107,7 +108,7 @@ export const quotationsModuleSchema = {
     sections: [
       {
         columns: 2,
-        icon:null,
+        icon: null,
         fields: [
           {
             name: "party_id",
@@ -137,10 +138,23 @@ export const quotationsModuleSchema = {
       },
       {
         columns: 2,
-        icon:null,
+        icon: null,
         fields: [
-          { name: "notes", label: "Notes", type: "textarea", rows: 3, gridSpan: 6, alwaysVisible: true, alwaysEditable: true },
-          { name: "terms", label: "Terms & Conditions", type: "textarea", rows: 3, gridSpan: 6, alwaysVisible: true, alwaysEditable: true },
+          { name: "scope_of_work", required: false, label: "Scope of Work", type: "editor", placeholder: "Describe services and deliverables included in this quotation", gridSpan: 12 },
+        ],
+      },
+      {
+        columns: 2,
+        icon: null,
+        fields: [
+          { name: "notes", required: false, label: "Notes", type: "editor", placeholder: "Provide Notes", gridSpan: 12 },
+        ],
+      },
+      {
+        columns: 2,
+        icon: null,
+        fields: [
+          { name: "terms", required: false, label: "Terms & Conditions", type: "editor", placeholder: "Provide terms & condition ", gridSpan: 12 },
         ],
       },
     ],

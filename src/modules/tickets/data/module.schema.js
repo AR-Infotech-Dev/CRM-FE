@@ -190,7 +190,7 @@ export const ticketsModuleSchema = {
   },
   defaultFilters: [
     { field: "assignee" },
-    { field: "ticket_status" },
+    
     { field: "due_date", },
     { field: "created_date", }
   ],
@@ -245,6 +245,7 @@ export const ticketsModuleSchema = {
             readOnlyWhen: (values) => Boolean(values.ticket_id),
             config: {
               type: "customer",
+              statusCheck:true,
               source: "customer",
               check: "name ,customer_products, mobile_no",
               list: "customer_id,name,created_date,mobile_no,email,contact_person,customer_products",

@@ -72,8 +72,6 @@ export const useSubscriptionsModule = ({ filterState }) => {
     const handleDeleteRow = async (row) => {
         const rowId = row?._id ?? row?.id ?? row?.adminID;
         if (!rowId) { toast.error("Subscription id not found."); return; }
-        if (!window.confirm("Delete this subscription?")) return;
-
         const action = await dispatch(deleteSubscriptions([rowId]));
 
         if (deleteSubscriptions.fulfilled.match(action)) {

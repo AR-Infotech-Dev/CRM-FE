@@ -73,8 +73,6 @@ export const useQuotationsModule = ({ filterState }) => {
     const handleDeleteRow = async (row) => {
         const rowId = row?.quotation_id;
         if (!rowId) { toast.error("Quotation id not found."); return; }
-        if (!window.confirm("Delete this quotation?")) return;
-
         const action = await dispatch(deleteQuotations([rowId]));
 
         if (deleteQuotations.fulfilled.match(action)) {

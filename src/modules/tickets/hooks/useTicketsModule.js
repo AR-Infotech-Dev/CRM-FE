@@ -190,8 +190,6 @@ export const useTicketsModule = ({ resolvedMenuID, filterState }) => {
       return;
     }
 
-    if (!window.confirm("Delete this ticket?")) return;
-
     const action = await dispatch(deleteTicketItems([rowId]));
 
     if (deleteTicketItems.fulfilled.match(action)) {

@@ -68,6 +68,37 @@ export const removeCompanyLogo = async (companyId) => {
   });
 };
 
+export const uploadCompanySignature = async ({ companyId, file }) => {
+  const uploadFormData = new FormData();
+  uploadFormData.append("signature", file);
+
+  return await makeRequest(companyMasterSchema.api.signatureUpload.replace(":id", companyId), {
+    method: "POST",
+    body: uploadFormData,
+  });
+};
+
+export const removeCompanySignature = async (companyId) => {
+  return await makeRequest(companyMasterSchema.api.signatureRemove.replace(":id", companyId), {
+    method: "DELETE",
+    body: {},
+  });
+};
+
+export const uploadHappyClientLogos = async ({ companyId, files }) => {
+  const uploadFormData = new FormData();
+  files.slice(0, 5).forEach((file) => uploadFormData.append("logos", file));
+  return await makeRequest(companyMasterSchema.api.happyClientLogosUpload.replace(":id", companyId), {
+    method: "POST",
+    body: uploadFormData,
+  });
+};
+
+export const removeHappyClientLogos = async (companyId) => makeRequest(
+  companyMasterSchema.api.happyClientLogosRemove.replace(":id", companyId),
+  { method: "DELETE", body: {} },
+);
+
 export const testCompanyMailConnection = async (payload) => {
   return await makeRequest(companyMasterSchema.api.testMail, {
     method: "POST",
