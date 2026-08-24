@@ -72,6 +72,11 @@ export const getCustomerDetails = async (customerId) => {
     method: "GET",
   });
 };
+export const getCompanyDetails = async (company_id) => {
+  return await makeRequest(`companies/getCompany/${company_id}`, {
+    method: "GET",
+  });
+};
 
 export const searchCustomerByName = async (name) => {
   return await makeRequest("/system/searchList", {

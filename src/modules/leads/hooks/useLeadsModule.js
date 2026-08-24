@@ -30,7 +30,7 @@ export const useLeadsModule = ({ filterState }) => {
   const handleDeleteSelected = () => selectedRowIds.length ? remove(selectedRowIds) : toast.error("Please select at least one lead");
   const handleDeleteRow = (row) => {
     if (!row?.lead_id) return toast.error("Lead id not found");
-    if (window.confirm("Delete this lead?")) return remove([row.lead_id]);
+    return remove([row.lead_id]);
   };
 
   return { pagination, page, loading, deleting, selectedRowIds, getLeadList, handlePageChange, handleToggleRow, handleToggleAllRows, handleDeleteSelected, handleDeleteRow };

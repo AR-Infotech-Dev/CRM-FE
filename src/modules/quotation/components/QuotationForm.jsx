@@ -63,7 +63,7 @@ function QuotationForm({ isOpen, onClose, selectedQuotation, onAfterSave, menu_i
           <div className="quotation-form-layout">
             <main className="quotation-form-main">
               <DynamicModuleForm
-                sections={[sections[0], sections[1]]}
+                sections={[sections[0]]}
                 values={form.formData}
                 addNewHandlers={{
                   party_id: form.openLeadCreate,
@@ -85,7 +85,7 @@ function QuotationForm({ isOpen, onClose, selectedQuotation, onAfterSave, menu_i
 
               <div className="quotation-notes">
                 <DynamicModuleForm
-                  sections={[sections[2]]}
+                  sections={[sections[1], sections[2], sections[3]]}
                   values={form.formData}
                   onChange={form.handleChange}
                   errors={form.errors}

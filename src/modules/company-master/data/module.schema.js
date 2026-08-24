@@ -40,6 +40,10 @@ export const companyMasterSchema = {
     testDB: "/companies/db-config/test",
     logoUpload: "/companies/logo",
     logoRemove: "/companies/:id/logo/remove",
+    signatureUpload: "/companies/:id/signature",
+    signatureRemove: "/companies/:id/signature/remove",
+    happyClientLogosUpload: "/companies/:id/happy-client-logos",
+    happyClientLogosRemove: "/companies/:id/happy-client-logos/remove",
     definitions: "/system/getDefinations",
     definitionsFallback: "/system/getstructure",
   },
@@ -92,6 +96,9 @@ export const companyMasterSchema = {
       time_format: "DD-MM-YYYY",
       date_format: "DD-MM-YYYY",
       email_logo: "",
+      authority_sign_url: "",
+      authority_sign: null,
+      happy_client_logos: [],
       email_app_password: "",
       created_by: null,
       created_date: null,
@@ -111,7 +118,11 @@ export const companyMasterSchema = {
       db_password: null,
       db_ssl_enabled: 'no',
       db_status: 'not_connected',
-
+      bank_name: null,
+      account_number: null,
+      ifsc_code: null,
+      branch: null,
+      quotation_terms: null,
       status: "active",
     },
     sections: [
@@ -178,10 +189,10 @@ export const companyMasterSchema = {
         title: "Ticket Settings",
         columns: 2,
         fields: [
-          { name: "ticket_prefix", label: "Ticket Prefix", type: "text", placeholder: "TKT", required: true, gridSpan: 3, },
-          { name: "ticket_prefix_padding", label: "Padding", type: "text", placeholder: "TKT", gridSpan: 3, },
+          { name: "ticket_prefix", label: "Ticket Prefix", type: "text", placeholder: "TKT", required: true, gridSpan: 2, },
+          { name: "ticket_prefix_padding", label: "Padding", type: "text", placeholder: "TKT", gridSpan: 2, },
           { name: "ticket_include_year", label: "Include Date", type: "radio", options: [{ label: "Yes", value: "y" }, { label: "No", value: "n" },], gridSpan: 3, },
-          { name: "ticket_no_reset", label: "Reset preference", type: "radio", options: [{ label: "Daily", value: "daily" }, { label: "Monthly", value: "monthly" }, { label: "Yearly", value: "yearly" },], gridSpan: 3, },
+          { name: "ticket_no_reset", label: "Reset preference", type: "radio", options: [{ label: "Daily", value: "daily" }, { label: "Monthly", value: "monthly" }, { label: "Yearly", value: "yearly" },], gridSpan: 5, },
         ],
       },
       {
@@ -192,6 +203,7 @@ export const companyMasterSchema = {
           { name: "own_db_enabled", label: "Own DB Enabled", type: "radio", options: [{ label: "Yes", value: "yes" }, { label: "No", value: "no" }], gridSpan: 3 },
         ],
       },
+
       {
         columns: 3,
         fields: [
@@ -202,6 +214,53 @@ export const companyMasterSchema = {
           { name: "db_username", label: "DB Username", type: "input", required: true, placeholder: "Enter database username", gridSpan: 4, visibleWhen: (values) => Boolean(values.own_db_enabled === 'yes') },
           { name: "db_password", label: "DB Password", type: "password", required: true, placeholder: "Enter database password", gridSpan: 4, visibleWhen: (values) => Boolean(values.own_db_enabled === 'yes') },
           { name: "db_ssl_enabled", label: "SSL Enabled", type: "radio", options: [{ label: "Yes", value: "yes" }, { label: "No", value: "no" }], gridSpan: 4, visibleWhen: (values) => Boolean(values.own_db_enabled === 'yes') },
+        ],
+      },
+      {
+        title: 'Quotation Settings',
+        icon: Settings,
+        columns: 3,
+        fields: [
+          { name: "bank_name", label: "Bank Name", type: "input", required: false, placeholder: "Enter bank name", gridSpan: 6 },
+          { name: "account_number", label: "Account No ", type: "input", required: false, placeholder: "Enter account no", gridSpan: 6 },
+        ],
+      },
+      {
+        columns: 3,
+        fields: [
+          { name: "ifsc_code", label: "IFSC Code", type: "input", required: false, placeholder: "Enter IFSC code", gridSpan: 6 },
+          { name: "branch", label: "Branch", type: "input", required: false, placeholder: "Enter branch", gridSpan: 6 },
+        ],
+      },
+      {
+        columns: 3,
+        fields: [
+          { name: "quotation_terms", plain_text: false, required: true, label: "Terms and conditions", type: "editor", placeholder: "Provide terms and condition...", gridSpan: 12 },
+          {
+            name: "authority_sign",
+            label: "Authority Sign",
+            type: "file",
+            gridSpan: 12,
+            multiple: false,
+            accept: "image/png,image/jpeg,image/jpg,image/webp",
+            maxSizeMB: 2,
+            showPreview: true,
+            buttonText: "Choose or drop signature",
+            helperText: "PNG, JPG or WebP - maximum 2 MB",
+          },
+          {
+            name: "happy_client_logos",
+            label: "Happy Client Logos",
+            type: "file",
+            gridSpan: 12,
+            multiple: true,
+            maxFiles: 5,
+            accept: "image/png,image/jpeg,image/jpg,image/webp",
+            maxSizeMB: 2,
+            showPreview: true,
+            buttonText: "Choose or drop client logos",
+            helperText: "Upload up to 5 PNG, JPG or WebP logos - maximum 2 MB each",
+          }
         ],
       },
       {
@@ -247,6 +306,9 @@ export const companyMasterSchema = {
     date_format: z.string().trim().min(1, "Date format is required"),
     time_format: z.string().trim().min(1, "Time format is required"),
     email_logo: z.string().optional(),
+    authority_sign_url: z.string().optional(),
+    authority_sign: z.any().nullable().optional(),
+    happy_client_logos: z.array(z.any()).max(5, "You can upload up to 5 client logos").optional(),
     status: z.enum(["active", "inactive", "delete"]),
   }).superRefine((data, ctx) => {
     if (data.mail_provider !== "custom") return;

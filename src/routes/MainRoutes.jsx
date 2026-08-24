@@ -150,7 +150,7 @@ function MainRoutes() {
           setMenus(stored);
           return;
         }
-        const nextMenus = await fetchMenuList("ithech mainroutes madhe", {
+        const nextMenus = await fetchMenuList({
           fallbackPermissions: getStoredPermissions(),
         });
         saveMenuList(nextMenus);

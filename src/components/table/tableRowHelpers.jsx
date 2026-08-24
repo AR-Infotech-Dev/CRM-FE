@@ -1,4 +1,5 @@
 import { createElement, isValidElement } from "react";
+import { confirmDelete } from "@utils/confirmDelete";
 import { Edit3, Star, Trash2 } from "lucide-react";
 import moment from "moment";
 import { isAmcActive } from "@utils/amc";
@@ -384,7 +385,9 @@ function ActionCell({ row, index, editRow, onDeleteRow, rowActions = [], renderA
         label: "Delete",
         icon: Trash2,
         className: "table-action-delete",
-        onClick: onDeleteRow,
+        onClick: async (selectedRow) => {
+          if (await confirmDelete()) onDeleteRow(selectedRow);
+        },
       }
       : null,
     ...rowActions.map((action) => normalizeAction(action, row, index)),

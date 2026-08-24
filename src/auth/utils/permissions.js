@@ -205,7 +205,7 @@ const fetchBootstrapMenus = async () => {
   }
 };
 
-export const fetchMenuList = async (msg, options = {}) => {
+export const fetchMenuList = async (options = {}) => {
   const { fallbackPermissions, forceRefresh = false } = options;
   const storedMenus = getStoredMenuList();
   if (!forceRefresh && storedMenus.length) return storedMenus;

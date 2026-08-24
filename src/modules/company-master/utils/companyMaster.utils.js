@@ -41,6 +41,25 @@ export const getLogoPathFromResponse = (response = {}) =>
   response?.url ||
   "";
 
+export const getSignaturePathFromResponse = (response = {}) =>
+  response?.data?.authority_sign ||
+  response?.data?.data?.authority_sign ||
+  response?.authority_sign ||
+  "";
+
+export const getHappyClientLogosFromResponse = (response = {}) =>
+  response?.data?.footer_logos || response?.data?.data?.footer_logos || [];
+
+const parseFooterLogos = (value) => {
+  if (Array.isArray(value)) return value;
+  try {
+    const parsed = JSON.parse(value || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
 export const buildMailConfigPayload = (formData = {}) => {
   const providerDefaults = MAIL_PROVIDER_DEFAULTS[formData.mail_provider] || MAIL_PROVIDER_DEFAULTS.gmail;
   const smtpUsername = formData.mail_provider === "custom"
@@ -84,6 +103,16 @@ export const normalizeCompanyData = (company = {}) => {
     time_format: company?.time_format || "DD-MM-YYYY",
     date_format: company?.date_format || "DD-MM-YYYY",
     email_logo: company?.email_logo || "",
+    authority_sign_url: company?.authority_sign || "",
+    authority_sign: company?.authority_sign
+      ? { name: String(company.authority_sign).split("/").pop(), url: getLogoUrl(company.authority_sign), existing: true }
+      : null,
+    happy_client_logos: parseFooterLogos(company?.footer_logos).map((logo, index) => ({
+      name: logo.name || `Client ${index + 1}`,
+      url: getLogoUrl(logo.path || logo.url || logo),
+      path: logo.path || logo.url || logo,
+      existing: true,
+    })),
     status: company?.status || "active",
   };
 };

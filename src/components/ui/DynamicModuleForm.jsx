@@ -8,6 +8,7 @@ import SmartSelect from "@formInputs/smartSelect";
 import SmartSelectInput from "@formInputs/smartSelectInput";
 import ColorSwatches from "@formInputs/ColorSwatches";
 import IconPicker from "@formInputs/IconPicker";
+import FileUpload from "@formInputs/FileUpload";
 import { useAuth } from "@auth/components/AuthProvider";
 import { hasFieldEditablePermission, hasFieldVisiblePermission } from "@auth/utils/permissions";
 
@@ -94,6 +95,8 @@ function DynamicModuleForm({ sections = [], values = {}, onChange, onObjectSelec
       case "iconPicker":
         return <IconPicker field={field} onChange={onChange} value={value} error={errors[field.name]} />;
         break;
+      case "file":
+        return <FileUpload field={field} onChange={onChange} value={value} error={errors[field.name]} />;
       default:
         return <Input field={field} onChange={onChange} value={value} error={errors[field.name]} />
         break;

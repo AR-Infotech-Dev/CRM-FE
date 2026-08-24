@@ -99,8 +99,6 @@ export const useCustomersModule = ({ filterState, exportColumnKeys = [] }) => {
     const handleDeleteRow = async (row) => {
         const rowId = row?.customer_id ?? row?._id ?? row?.id;
         if (!rowId) { toast.error("Customer id not found."); return; }
-        if (!window.confirm("Delete this Customer?")) return;
-
         const action = await dispatch(deleteCustomer([rowId]));
 
         if (deleteCustomer.fulfilled.match(action)) {

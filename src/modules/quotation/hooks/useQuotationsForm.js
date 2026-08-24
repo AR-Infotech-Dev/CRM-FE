@@ -1,6 +1,7 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import {
+  getCompanyDetails as fetchCompanyDetails,
   getQuotationDetails,
   saveQuotation,
   sendQuotation,
@@ -13,6 +14,8 @@ import {
   getQuotationIdentifier,
   normalizeQuotationData,
 } from "../utils/quotations.utils";
+import { useAuth } from "@/auth/components/AuthProvider";
+
 
 const getValidationErrors = (validationResult) => {
   const nextErrors = {};
@@ -30,6 +33,7 @@ const getValidationErrors = (validationResult) => {
 };
 
 export const useQuotationForm = ({ isOpen, onClose, onAfterSave, selectedQuotation }) => {
+  const { authSession } = useAuth();
   const [loading, setLoading] = useState(false);
   const [fetchingQuotation, setFetchingQuotation] = useState(false);
   const [formData, setFormData] = useState(createInitialQuotation);
@@ -57,8 +61,7 @@ export const useQuotationForm = ({ isOpen, onClose, onAfterSave, selectedQuotati
         const quotationData = detailsResponse?.success
           ? normalizeQuotationData(detailsResponse.data)
           : createInitialQuotation();
-          
-        setFormData(quotationData);
+
         const isLead = Boolean(quotationData.lead_id && !quotationData.customer_id);
         setFormData({
           ...quotationData,
@@ -85,11 +88,31 @@ export const useQuotationForm = ({ isOpen, onClose, onAfterSave, selectedQuotati
       .finally(() => {
         if (isMounted) setFetchingQuotation(false);
       });
-
     return () => {
       isMounted = false;
     };
   }, [isOpen, quotationID]);
+
+  useEffect(() => {
+    const companyID = authSession?.user?.company_id;
+    if (!isOpen || mode !== "create" || !companyID) return;
+
+    let isMounted = true;
+    fetchCompanyDetails(companyID)
+      .then((response) => {
+        if (!isMounted || !response?.success) return;
+        const company = Array.isArray(response.data) ? response.data[0] : response.data;
+        if (!company?.quotation_terms) return;
+        setFormData((current) => ({ ...current, terms: company.quotation_terms }));
+      })
+      .catch((error) => {
+        if (isMounted) toast.error(error.message || "Unable to load company quotation defaults");
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [authSession?.user?.company_id, isOpen, mode]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -215,30 +238,33 @@ export const useQuotationForm = ({ isOpen, onClose, onAfterSave, selectedQuotati
     }
 
     setLoading(true);
-    const response = await saveQuotation({ mode, quotationID, formData: payload });
-    if (!response.success) {
-      setLoading(false);
-      toast.error(response.message || "Unable to save quotation");
-      return;
-    }
-
-    if (shouldSend) {
-      const savedQuotationId = response.quotation_id || response.data?.quotation_id || quotationID;
-      const sendResponse = await sendQuotation(savedQuotationId, recipientEmail);
-      if (!sendResponse.success) {
-        setLoading(false);
-        toast.error(sendResponse.message || "Quotation saved, but email could not be sent");
-        onAfterSave?.();
+    try {
+      const response = await saveQuotation({ mode, quotationID, formData: payload });
+      if (!response.success) {
+        toast.error(response.message || "Unable to save quotation");
         return;
       }
-      toast.success(sendResponse.message || `Quotation sent to ${recipientEmail}`);
-    } else {
-      toast.success(`Quotation ${mode === "create" ? "created" : "updated"} successfully`);
-    }
-    setLoading(false);
 
-    handleClose();
-    onAfterSave?.();
+      if (shouldSend) {
+        const savedQuotationId = response.quotation_id || response.data?.quotation_id || quotationID;
+        const sendResponse = await sendQuotation(savedQuotationId, recipientEmail);
+        if (!sendResponse.success) {
+          toast.error(sendResponse.message || "Quotation saved, but email could not be sent");
+          onAfterSave?.();
+          return;
+        }
+        toast.success(sendResponse.message || `Quotation sent to ${recipientEmail}`);
+      } else {
+        toast.success(`Quotation ${mode === "create" ? "created" : "updated"} successfully`);
+      }
+
+      handleClose();
+      onAfterSave?.();
+    } catch (error) {
+      toast.error(error.message || (shouldSend ? "Unable to save or send quotation" : "Unable to save quotation"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const openLeadCreate = ({ searchText = "", selectOption } = {}) => {
@@ -251,7 +277,6 @@ export const useQuotationForm = ({ isOpen, onClose, onAfterSave, selectedQuotati
     setPendingPartySelect(null);
     setNewLeadInitialValues({});
   };
-
   const handleLeadSaved = async (res = {}, payload = {}) => {
     try {
       const responseLead = Array.isArray(res?.data) ? res.data[0] : res?.data;
