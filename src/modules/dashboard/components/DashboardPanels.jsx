@@ -21,7 +21,7 @@ export function DashboardPanels({
         <div className="dashboard-panel-head">
           <div>
             <span className="dashboard-section-label">Quotations</span>
-            <h2>{adminView ? "Company Pending Follow-ups" : "My Pending Follow-ups"}</h2>
+            <h2>{adminView ? "Pending Follow-ups" : "My Pending Follow-ups"}</h2>
           </div>
           <strong>{dashboard.quotationFollowups.length}</strong>
         </div>

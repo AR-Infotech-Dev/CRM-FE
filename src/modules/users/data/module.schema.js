@@ -1,5 +1,8 @@
+import { default_filter_fields } from "@/utils/common";
 import { buildFallbackColumnsFromKeys } from "../../../utils/moduleStructure";
 import { z } from "zod";
+
+
 
 const FIXED_TABLE_COLUMNS = [
   { key: "select", className: "check-col", checkbox: true, width: 42, minWidth: 42, resizable: false },
@@ -25,32 +28,39 @@ export const usersModuleSchema = {
     modelNameField: "model_name",
     modelName: "user",
   },
-  staticJoined: [
-    // Keep joined field metadata here so future modules can reuse the same pattern.
-    // If you have dropdown APIs later, options can be filled dynamically from here.
-    {
-      field: "roleID",
-      fieldtype: "joined",
-      joinedTable: "user_role_master",
-      select: "roleID,roleName",
-      primaryKey: "roleID",
-      labelKey: "roleName",
-      slug: "",
-      options: [],
+  filterFieldOptions: {
+    roleID: {
+      type: "select",
+      optionsSource: {
+        apiUrl: "/system/searchList",
+        body: {
+          tableName: "user_role_master",
+          list: "roleID,roleName",
+          wherec: "roleName",
+        },
+        rowsPath: ["data"],
+        valueKey: "roleID",
+        labelKey: "roleName",
+      },
     },
-    {
-      field: "default_company",
-      fieldtype: "company",
-      joinedTable: "company_master",
-      select: "company_id,company_name",
-      primaryKey: "company_id",
-      labelKey: "company_name",
-      slug: "",
-      options: [],
+    company_id: {
+      type: "select",
+      optionsSource: {
+        apiUrl: "/system/searchList",
+        body: {
+          tableName: "company_master",
+          list: "company_id,company_name",
+          wherec: "company_name",
+        },
+        rowsPath: ["data"],
+        valueKey: "company_id",
+        labelKey: "company_name",
+      },
     },
-  ],
+    ...default_filter_fields,
+  },
   defaultColumns: ["name", "userName", "email", "contactNo", "roleID", "status", "company_id"],
-  skipFields: ["user_setting", "gfcmToken", "otp", "country_code", "otp_exp_time", "g_cal_token", "one_drive_access_token", "is_google_sync", "is_one_drive_sync", "ftoken", "isVerified", "photo", "adminID", "latitude", "longitude", "roleOfUser", "password"],
+  skipFields: ['default_company', "user_setting", "gfcmToken", "otp", "country_code", "otp_exp_time", "g_cal_token", "one_drive_access_token", "is_google_sync", "is_one_drive_sync", "ftoken", "isVerified", "photo", "adminID", "latitude", "longitude", "roleOfUser", "password"],
   tableCellConfig: [
     { column_name: "name", type: "person" },
     { column_name: "userName", type: "person" },
@@ -64,7 +74,7 @@ export const usersModuleSchema = {
     { whatsappNo: "Whatsapp No" },
     { dateOfBirth: "Date Of Birth" },
     { lastLogin: "Last Login" },
-    { company_id: "Assigned Company" },
+    { company_id: "Company Name" },
     { userName: "User Name" },
     { roleID: "User Role" },
     { is_approver: "Approval Privileges" },
@@ -220,7 +230,6 @@ export const usersModuleSchema = {
           //   // }}
           //   //   />
           // },
-
         ],
       },
 
@@ -232,18 +241,6 @@ export const usersModuleSchema = {
       },
     ],
   },
-  // validationSchema: z.object({
-  //   name: z.string().min(1, "Name is required").nullable(),
-  //   userName: z.string().min(3, "Username must be at least 3 characters"),
-  //   email: z.string().email("Invalid email address"),
-  //   dateOfBirth: z.coerce.date()
-  //     .min(new Date("1900-01-01"), { message: "Too old" })
-  //     .max(new Date(), { message: "Birth date cannot be in the future" }),
-  //   roleID: z.any().refine((value) => value !== "" && value !== null && value !== undefined, {
-  //     message: "Role is required",
-  //   }),
-  //   status: z.string()
-  // })
   validationSchema: z.object({
     name: z.string().nullable().refine((val) => val !== null && val.trim() !== "", {
       message: "Name is required",

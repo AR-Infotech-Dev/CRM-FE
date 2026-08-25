@@ -1,3 +1,50 @@
+export const default_filter_fields = {
+  created_by: {
+    type: "select",
+    optionsSource: {
+      apiUrl: "/system/searchList",
+      body: {
+        tableName: "admin",
+        list: "adminID,name",
+        wherec: "name",
+        status: "true",
+      },
+      rowsPath: ["data"],
+      valueKey: "adminID",
+      labelKey: "name",
+    },
+  },
+  company_id: {
+    type: "select",
+    optionsSource: {
+      apiUrl: "/system/searchList",
+      body: {
+        tableName: "company_master",
+        list: "company_id,company_name",
+        wherec: "company_name",
+      },
+      rowsPath: ["data"],
+      valueKey: "company_id",
+      labelKey: "company_name",
+    },
+  },
+  modified_by: {
+    type: "select",
+    optionsSource: {
+      apiUrl: "/system/searchList",
+      body: {
+        tableName: "admin",
+        list: "adminID,name",
+        wherec: "name",
+        status: "true",
+      },
+      rowsPath: ["data"],
+      valueKey: "adminID",
+      labelKey: "name",
+    },
+  },
+};
+
 const COLORS = [
   "#2563EB",
   "#7C3AED",

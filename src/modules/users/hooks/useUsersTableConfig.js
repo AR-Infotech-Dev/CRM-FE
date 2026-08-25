@@ -17,6 +17,7 @@ export const useUsersTableConfig = ({ resolvedMenuID, filterState }) => {
         skipFields: usersModuleSchema.skipFields,
         columnMappings: usersModuleSchema.columnMappings,
         tableCellConfig: usersModuleSchema.tableCellConfig,
+        filterFieldOptions: usersModuleSchema.filterFieldOptions,
     };
 
     const resolvedColumns = useMemo(

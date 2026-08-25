@@ -196,14 +196,14 @@ export function buildFallbackColumnsFromKeys(keys = [], options = {}) {
       cellDisplayMap
     );
 
-      return {
-        key,
-        label: getFieldLabel({}, key, labelMap),
-        width: cellConfig?.width || 180,
-        minWidth: cellConfig?.minWidth || 120,
-        cellType: cellConfig?.type || 'text',
-        colorField: cellConfig?.colorField || "",
-      }
+    return {
+      key,
+      label: getFieldLabel({}, key, labelMap),
+      width: cellConfig?.width || 180,
+      minWidth: cellConfig?.minWidth || 120,
+      cellType: cellConfig?.type || 'text',
+      colorField: cellConfig?.colorField || "",
+    }
   }
   );
 }
@@ -269,9 +269,9 @@ export function buildFilterFieldsFromStructure(fields = [], fallbackFields = [],
   return normalizedFields.length
     ? normalizedFields
     : fallbackFields.map((field) => ({
-        ...field,
-        type: getFilterFieldType(field.value, field.type),
-      }));
+      ...field,
+      type: getFilterFieldType(field.value, field.type),
+    }));
 }
 
 export async function getDefinitions(menu_id) {
