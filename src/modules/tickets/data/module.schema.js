@@ -190,7 +190,6 @@ export const ticketsModuleSchema = {
   },
   defaultFilters: [
     { field: "assignee" },
-    
     { field: "due_date", },
     { field: "created_date", }
   ],

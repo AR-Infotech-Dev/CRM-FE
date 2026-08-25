@@ -97,29 +97,29 @@ function QuotationPreviewFlyout({ isOpen, quotation, onClose, onSend, onStatusCh
 
           {status === "sent" && (
             <>
-              <button className="flex items-center p-2 pt-2.5 rounded-md text-white gap-1.5 justify-center text-sm font-bold bg-green-600" disabled={Boolean(actionLoading)} onClick={() => runAction("approve", () => onStatusChange?.(quotation, "approved"))} type="button">
-                <CheckCircle2 size={16} /> Approve
+              <button className="flex items-center p-2 py-1.5 rounded-md text-white gap-1.5 justify-center text-sm font-bold bg-green-500" disabled={Boolean(actionLoading)} onClick={() => runAction("approve", () => onStatusChange?.(quotation, "approved"))} type="button">
+                <CheckCircle2 size={13} /> Approve
               </button>
-              <button className="flex items-center p-2 pt-2.5 rounded-md text-white gap-1.5 justify-center text-sm font-bold  bg-red-600" disabled={Boolean(actionLoading)} onClick={() => runAction("reject", () => onStatusChange?.(quotation, "rejected"))} type="button">
-                <XCircle size={16} /> Reject
+              <button className="flex items-center p-2 py-1.5 rounded-md text-white gap-1.5 justify-center text-sm font-bold  bg-red-500" disabled={Boolean(actionLoading)} onClick={() => runAction("reject", () => onStatusChange?.(quotation, "rejected"))} type="button">
+                <XCircle size={13} /> Reject
               </button>
             </>
           )}
 
           {["sent", "rejected", "revision_required"].includes(status) && (
-            <button className="flex items-center p-2 pt-2.5 rounded-md text-white gap-1.5 justify-center text-sm font-bold bg-orange-500 action-revise" disabled={Boolean(actionLoading)} onClick={() => runAction("revise", () => onRevise?.(quotation))} type="button">
-              <RefreshCcw size={16} /> Create Revision
+            <button className="flex items-center p-2 py-1.5 rounded-md text-white gap-1.5 justify-center text-sm font-bold bg-orange-400 action-revise" disabled={Boolean(actionLoading)} onClick={() => runAction("revise", () => onRevise?.(quotation))} type="button">
+              <RefreshCcw size={13} /> Create Revision
             </button>
           )}
 
           {status === "sent" && (
-            <button className="quotation-preview-action action-followup" disabled={Boolean(actionLoading)} onClick={() => runAction("followup", () => onScheduleFollowup?.(quotation))} type="button">
-              <CalendarClock size={16} /> Schedule Follow-up
+            <button className="quotation-preview-action action-followup min-h-0! p-2 py-1.5" disabled={Boolean(actionLoading)} onClick={() => runAction("followup", () => onScheduleFollowup?.(quotation))} type="button">
+              <CalendarClock size={13} /> Schedule Follow-up
             </button>
           )}
 
-          <button className="quotation-preview-action action-download" disabled={!html || loading} onClick={printPreview} type="button">
-            <Download size={16} /> Print / Save PDF
+          <button className="quotation-preview-action action-download min-h-0! p-2 py-1.5" disabled={!html || loading} onClick={printPreview} type="button">
+            <Download size={13} /> Print / Save PDF
           </button>
 
           <div className="quotation-followup-list">
