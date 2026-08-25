@@ -193,8 +193,6 @@ export const useAmcticketsModule = ({ resolvedMenuID, filterState }) => {
       return;
     }
 
-    if (!window.confirm("Delete this amcticket?")) return;
-
     const action = await dispatch(deleteAmcticketItems([rowId]));
 
     if (deleteAmcticketItems.fulfilled.match(action)) {

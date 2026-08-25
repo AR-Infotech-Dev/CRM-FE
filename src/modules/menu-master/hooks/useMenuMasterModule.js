@@ -12,6 +12,7 @@ import {
   setMenuMasterRows,
 } from "../data/menuMaster.slice";
 import { getMenuIdentifier } from "../utils/menuMaster.utils";
+import { confirmDelete } from "@utils/confirmDelete";
 
 export const useMenuMasterModule = ({ filterState }) => {
   const dispatch = useAppDispatch();
@@ -37,6 +38,8 @@ export const useMenuMasterModule = ({ filterState }) => {
       toast.error("Menu id not found.");
       return;
     }
+
+    if (!await confirmDelete({ itemLabel: "menu" })) return;
 
     const action = await dispatch(deleteMenuItems([menuId]));
 

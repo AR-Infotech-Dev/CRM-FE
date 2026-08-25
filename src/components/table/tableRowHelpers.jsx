@@ -1,4 +1,5 @@
 import { createElement, isValidElement } from "react";
+import { confirmDelete } from "@utils/confirmDelete";
 import { Edit3, Star, Trash2 } from "lucide-react";
 import moment from "moment";
 import { isAmcActive } from "@utils/amc";
@@ -34,6 +35,7 @@ const PILL_BASE_CLASS = {
 
 export function getRowIdentifier(row) {
   return (
+    row?.quotation_id ??
     row?.category_id ??
     row?._id ??
     row?.id ??
@@ -316,6 +318,10 @@ function renderValueCell(column, row, index, selectionProps) {
       return renderBadgeCell("badge", value, row, colorField);
     case "status":
       return renderBadgeCell("status", value, row, colorField);
+    case "revision":
+      return String(value || "").toLowerCase() === "yes"
+        ? <span className="tag lilac">Revised</span>
+        : "-";
     case "dotText":
       return renderDotTextCell(value, row, colorField, index);
     case "date":
@@ -379,7 +385,9 @@ function ActionCell({ row, index, editRow, onDeleteRow, rowActions = [], renderA
         label: "Delete",
         icon: Trash2,
         className: "table-action-delete",
-        onClick: onDeleteRow,
+        onClick: async (selectedRow) => {
+          if (await confirmDelete()) onDeleteRow(selectedRow);
+        },
       }
       : null,
     ...rowActions.map((action) => normalizeAction(action, row, index)),

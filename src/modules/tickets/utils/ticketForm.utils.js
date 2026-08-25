@@ -14,12 +14,14 @@ export const normalizeCustomerProducts = (source = []) => {
   const rows = typeof source === "string" ? safeParseJson(source, []) : source;
   return Array.isArray(rows)
     ? rows
-      .map((row) => ({
-        product_id: row?.product_id || "",
-        product_name: row?.product_name || "",
-        serial_number: row?.serial_number || row?.product_serial_number || "",
-        add_ons: Array.isArray(row?.add_ons) ? row.add_ons.filter(Boolean) : [],
-      }))
+      .map((row) => {
+        return ({
+          product_id: row?.product_id || "",
+          product_name: row?.product_name || "",
+          serial_number: String(row?.serial_number || row?.product_serial_number || "").trim(),
+          add_ons: normalizeTicketAddOns(row?.add_ons || row?.addons || row?.addOns || []),
+        })
+      })
       .filter((row) => row.product_id || row.product_name || row.serial_number || row.add_ons.length)
     : [];
 };
@@ -100,6 +102,8 @@ export const normalizeTicketData = (ticket = {}) => ({
   customer_products: normalizeCustomerProducts(ticket?.customer_products || ticket?.products || []),
   customer_contacts: normalizeCustomerContacts(ticket?.customer_contacts || ticket?.contact_persons || []),
   contact_persons: normalizeCustomerContacts(ticket?.contact_persons || ticket?.customer_contacts || []),
+  ratings: ticket?.ratings || null,
+  feedback_submitted: ticket?.feedback_submitted || null,
   assignee: ticket?.assignee || null,
   status: ticket?.status || "active",
 });

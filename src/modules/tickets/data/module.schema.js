@@ -1,6 +1,7 @@
 import { readonly, z } from "zod";
 import { buildFallbackColumnsFromKeys } from "../../../utils/moduleStructure";
-
+import CustomerRowTemplate from "../components/CustomerRowTemplate"
+import AssigneeRowTemplate from "../components/AssigneeRowTemplate";
 // const auth_id = window.localStorage.getItem('auth_id')
 const FIXED_TABLE_COLUMNS = [
   { key: "select", className: "check-col", checkbox: true, width: 42, minWidth: 42, resizable: false },
@@ -65,12 +66,13 @@ export const ticketsModuleSchema = {
       ticket_status: targetColumnId,
     }),
     cardFields: [
-      { key: "ticket_visibility_label", label: "View", type: "badge", colorField: "ticket_visibility_color" },
+      // { key: "ticket_visibility_label", label: "View", type: "badge", colorField: "ticket_visibility_color" },
       { key: "client_id", label: "Client" },
       { key: "assignee", label: "Assignee", type: "person" },
-      { key: "query_type", label: "Type", type: "badge", colorField: "type_color" },
       { key: "due_date", label: "Due", type: "date" },
+      { key: "query_type", label: "Type", type: "badge", colorField: "type_color" },
       { key: "ticket_priority", label: "Priority", type: "tag", colorField: "priority_color" },
+      { key: "ratings", label: "Rating", type: "ratings", visibleWhen: (row) => row.feedback_submitted == "y" },
     ],
   },
   defaultColumns: ["client_id", "query_type", "ticket_status", "assignee", "ticket_priority", "start_date", "due_date"],
@@ -188,8 +190,8 @@ export const ticketsModuleSchema = {
   },
   defaultFilters: [
     { field: "assignee" },
-    { field: "ticket_status" },
-    { field: "due_date", }
+    { field: "due_date", },
+    { field: "created_date", }
   ],
   savedFilters: [],
   form: {
@@ -212,6 +214,7 @@ export const ticketsModuleSchema = {
         department: "",
       },
       description: null,
+      initial_comment: "",
       query_type: null,
       ticket_status: "205",
       ticket_priority: null,
@@ -219,6 +222,7 @@ export const ticketsModuleSchema = {
       assignee: ASSIGNEE || null,
       start_date: new Date().toISOString().split("T")[0],
       due_date: null,
+      instructions: null,
       visit_required: 'n',
       company_id: null,
       created_by: null,
@@ -232,7 +236,7 @@ export const ticketsModuleSchema = {
         fields: [
           {
             name: "client_id",
-            label: "Client Name",
+            label: "Client",
             type: "smartSelectInput",
             required: true,
             id: "client_id",
@@ -240,25 +244,17 @@ export const ticketsModuleSchema = {
             readOnlyWhen: (values) => Boolean(values.ticket_id),
             config: {
               type: "customer",
+              statusCheck:true,
               source: "customer",
+              check: "name ,customer_products, mobile_no",
               list: "customer_id,name,created_date,mobile_no,email,contact_person,customer_products",
               placeholder: "Select Client",
               allowAddNew: true,
               multi: false,
+              RowTemp: CustomerRowTemplate,
+              rowHeight: 80,
               getValue: (item) => item.customer_id,
-              getLabel: (item) => {
-                const serialNumbers =
-                  item.customer_products?.length
-                    ? item.customer_products
-                      .map(product => product.serial_number)
-                      .filter(Boolean)
-                      .join(", ")
-                    : "";
-
-                return serialNumbers
-                  ? `${item.name} (${serialNumbers})`
-                  : (item.name || "Unnamed Client");
-              }
+              getLabel: (item) => item.name,
             },
           },
           {
@@ -277,17 +273,19 @@ export const ticketsModuleSchema = {
         columns: 2,
         fields: [
           {
-            name: "product_id",
+            name: "product_serial_number",
             label: "Product",
             type: "select",
             placeholder: "Select product",
             gridSpan: 12,
             visibleWhen: (values) => Boolean(values.client_id),
-            options: (values) => (Array.isArray(values.customer_products) ? values.customer_products : []).map((product) => ({
-              key: `${product.product_id || "product"}-${product.serial_number || product.product_serial_number || "serial"}`,
-              value: product.product_id,
-              label: `${product.product_name || "Unnamed Product"}${product.serial_number ? ` - ${product.serial_number}` : ""}`,
-            })),
+            options: (values) => (Array.isArray(values.customer_products) ? values.customer_products : []).map((product) => {
+              return ({
+                key: `${product.product_id || "product"}-${product.serial_number || product.product_serial_number || "serial"}`,
+                value: product.serial_number,
+                label: `${product.product_name || "Unnamed Product"}${product.serial_number ? ` - ${product.serial_number}` : ""}`,
+              })
+            }),
           },
         ],
       },
@@ -297,15 +295,16 @@ export const ticketsModuleSchema = {
           {
             name: "query_type",
             label: "Query Type",
-            type: "smartSelect",
+            type: "smartSelectInput",
             id: "query_type",
             gridSpan: 6,
             required: true,
             config: {
               apiUrl: "/system/searchSlugList",
-              tableName: "categories",
-              selectFields: "category_id,categoryName",
-              searchField: "categoryName",
+              type: "category",
+              source: "query_types",
+              list: "category_id,categoryName",
+              check: "categoryName",
               slug: 'query_types',
               status: 'active',
               isCompanyWise: true,
@@ -321,7 +320,9 @@ export const ticketsModuleSchema = {
             type: "select",
             placeholder: "Select add-on",
             gridSpan: 6,
-            visibleWhen: (values) => Boolean(values.client_id && values.product_id && isCustomizationQuery(values) && getSelectedProductAddOns(values).length),
+            alwaysVisible: true,
+            alwaysEditable: true,
+            visibleWhen: (values) => Boolean(values.client_id && values.product_serial_number && isCustomizationQuery(values) && getSelectedProductAddOns(values).length),
             options: (values) => getSelectedProductAddOns(values).map((addOn) => ({
               value: addOn,
               label: addOn,
@@ -381,14 +382,15 @@ export const ticketsModuleSchema = {
           {
             name: "ticket_priority",
             label: "Priority",
-            type: "smartSelect",
+            type: "smartSelectInput",
             id: "ticket_priority",
             gridSpan: 6,
             config: {
               apiUrl: "/system/searchSlugList",
-              tableName: "categories",
-              selectFields: "category_id,categoryName",
-              searchField: "categoryName",
+              type: "category",
+              source: "ticket_priority",
+              list: "category_id,categoryName",
+              check: "categoryName",
               labelKey: "categoryName",
               slug: 'ticket_priority',
               isCompanyWise: true,
@@ -401,14 +403,15 @@ export const ticketsModuleSchema = {
           {
             name: "ticket_status",
             label: "Ticket Status",
-            type: "smartSelect",
+            type: "smartSelectInput",
             id: "ticket_status",
             gridSpan: 6,
             config: {
               apiUrl: "/system/searchSlugList",
-              tableName: "categories",
-              selectFields: "category_id,categoryName",
-              searchField: "categoryName",
+              type: "category",
+              source: "ticket_status",
+              list: "category_id,categoryName",
+              check: "categoryName",
               slug: 'ticket_status',
               status: 'active',
               labelKey: "categoryName",
@@ -444,10 +447,10 @@ export const ticketsModuleSchema = {
               source: "admin",
               list: "adminID,name,status",
               check: "name",
+              RowTemp: AssigneeRowTemplate,
+              rowHeight: 52,
               getValue: (item) => item.adminID,
               getLabel: (item) => item.name || "Unnamed Assignee",
-              countKey: "pending_tickets_count",
-              countLabel: "pending",
               placeholder: "Select Assignee",
               multi: false
             }
@@ -510,11 +513,18 @@ export const ticketsModuleSchema = {
           { name: "description", plain_text: true, required: true, label: "Issue Description", type: "editor", placeholder: "Provide details about the ticket...", gridSpan: 12 },
         ]
       },
+      {
+        columns: 1,
+        fields: [
+          { name: "instructions", plain_text: true, required: false, label: "Instructions", type: "editor", placeholder: "Provide instructions about the ticket...", gridSpan: 12 },
+        ]
+      },
     ],
   },
   validationSchema: z.object({
     client_id: z.coerce.number().min(1, "Customer is Required!"),
     description: z.string().nullable().transform(v => v ?? "").pipe(z.string().trim().min(1, "Description is Required!")),
+    initial_comment: z.string().trim().max(5000, "Initial comment is too long").optional().default(""),
     contact_person: z.string().nullable().optional().transform(v => v ?? "").refine(v => v === "" || v.trim().length > 0, "Contact person name required"),
     contact_no: z.string().nullable().optional().transform(v => v ?? "").refine(v => v === "" || /^[0-9]\d{9}$/.test(v), "Enter valid 10-digit mobile number"),
     save_contact: z.boolean().optional().default(false),

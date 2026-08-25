@@ -3,7 +3,7 @@ import { Building2, CheckCircle2, Clock3, Download, RotateCcw, Search, Ticket, T
 import { toast } from "react-toastify";
 import ModulePagination from "../../shared/ModulePagination";
 import { getCurrentSession } from "../../../auth/utils/authStorage";
-import { fetchReportCompanies } from "../performance-report/performance.service";
+import { fetchReportCompanies } from "../performance-report/data/performance.service";
 import { fetchCompanyCustomerTicketReport, downloadCustomerWiseReport } from "./companyCustomerReport.service";
 import { formatReportDate, toReportDateInput } from "../report.utils";
 import "./company-customer-report.css";
@@ -56,24 +56,25 @@ function CompanyCustomerTicketReport() {
 
   useEffect(() => {
     let mounted = true;
-    fetchReportCompanies().then((items) => {
-      if (!mounted) return;
-      const user = getCurrentSession()?.user || {};
-      const isSuperAdmin = user.role_slug === "super_admin";
-      const scopedItems = isSuperAdmin
-        ? items
-        : items.filter((item) => String(item.value) === String(user.company_id || ""));
-      const visibleItems = scopedItems.length
-        ? scopedItems
-        : user.company_id
-          ? [{ value: String(user.company_id), label: user.company_name || "My Company" }]
-          : [];
-      setCompanies(visibleItems);
-      setFilters((current) => ({
-        ...current,
-        company_id: current.company_id || (visibleItems.length === 1 ? visibleItems[0].value : ""),
-      }));
-    });
+    fetchReportCompanies().then(
+      (items) => {
+        if (!mounted) return;
+        const user = getCurrentSession()?.user || {};
+        const isSuperAdmin = user.role_slug === "super_admin";
+        const scopedItems = isSuperAdmin
+          ? items
+          : items.filter((item) => String(item.value) === String(user.company_id || ""));
+        const visibleItems = scopedItems.length
+          ? scopedItems
+          : user.company_id
+            ? [{ value: String(user.company_id), label: user.company_name || "My Company" }]
+            : [];
+        setCompanies(visibleItems);
+        setFilters((current) => ({
+          ...current,
+          company_id: current.company_id || (visibleItems.length === 1 ? visibleItems[0].value : ""),
+        }));
+      });
     return () => {
       mounted = false;
     };

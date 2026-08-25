@@ -82,8 +82,6 @@ export const useCompanyMasterModule = ({ filterState }) => {
       return;
     }
 
-    if (!window.confirm("Delete this company?")) return;
-
     const action = await dispatch(deleteCompanyItems([rowId]));
 
     if (deleteCompanyItems.fulfilled.match(action)) {
