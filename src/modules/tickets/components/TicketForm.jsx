@@ -62,58 +62,58 @@ function QuickAddContactPanel({ formData = {}, errors = {}, onChange, showContac
       </div>
 
       <div className="grid grid-cols-12 gap-3">
-          <label className="col-span-12 flex flex-col gap-1 md:col-span-6">
-            <span className="text-xs font-medium text-slate-600">Contact Name *</span>
-            <input
-              name="name"
-              value={details.name || ""}
-              onChange={onChange}
-              className="rounded border border-blue-100 bg-white px-3 py-1.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-100"
-              placeholder="Enter contact name"
-            />
-          </label>
-          <label className="col-span-12 flex flex-col gap-1 md:col-span-6">
-            <span className="text-xs font-medium text-slate-600">Mobile *</span>
-            <input
-              name="mobile_no"
-              type="tel"
-              inputMode="numeric"
-              maxLength={10}
-              value={details.mobile_no || mobile}
-              onChange={onChange}
-              autoFocus={showContactPanel}
-              className="rounded border border-blue-100 bg-white px-3 py-1.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-100"
-              placeholder="Enter 10-digit mobile number"
-            />
-          </label>
-          <label className="col-span-12 flex flex-col gap-1 md:col-span-6">
-            <span className="text-xs font-medium text-slate-600">Designation</span>
-            <select
-              name="designation"
-              value={details.designation || ""}
-              onChange={onChange}
-              className="rounded border border-blue-100 bg-white px-3 py-1.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-100"
-              placeholder="Optional"
-            >
-              <option value="">Select designation</option>
-              <option value="owner">Owner</option>
-              <option value="admin">Admin</option>
-              <option value="accountant">Accountant</option>
-              <option value="other">Other</option>
-            </select>
-          </label>
-          <label className="col-span-12 flex flex-col gap-1 md:col-span-6">
-            <span className="text-xs font-medium text-slate-600">Email</span>
-            <input
-              name="email"
-              value={details.email || ""}
-              onChange={onChange}
-              className="rounded border border-blue-100 bg-white px-3 py-1.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-100"
-              placeholder="Optional"
-            />
-          </label>
-          {fieldError && <p className="col-span-12 text-xs font-medium text-red-500">{fieldError}</p>}
-        </div>
+        <label className="col-span-12 flex flex-col gap-1 md:col-span-6">
+          <span className="text-xs font-medium text-slate-600">Contact Name *</span>
+          <input
+            name="name"
+            value={details.name || ""}
+            onChange={onChange}
+            className="rounded border border-blue-100 bg-white px-3 py-1.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-100"
+            placeholder="Enter contact name"
+          />
+        </label>
+        <label className="col-span-12 flex flex-col gap-1 md:col-span-6">
+          <span className="text-xs font-medium text-slate-600">Mobile *</span>
+          <input
+            name="mobile_no"
+            type="tel"
+            inputMode="numeric"
+            maxLength={10}
+            value={details.mobile_no || mobile}
+            onChange={onChange}
+            autoFocus={showContactPanel}
+            className="rounded border border-blue-100 bg-white px-3 py-1.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-100"
+            placeholder="Enter 10-digit mobile number"
+          />
+        </label>
+        <label className="col-span-12 flex flex-col gap-1 md:col-span-6">
+          <span className="text-xs font-medium text-slate-600">Designation</span>
+          <select
+            name="designation"
+            value={details.designation || ""}
+            onChange={onChange}
+            className="rounded border border-blue-100 bg-white px-3 py-1.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-100"
+            placeholder="Optional"
+          >
+            <option value="">Select designation</option>
+            <option value="owner">Owner</option>
+            <option value="admin">Admin</option>
+            <option value="accountant">Accountant</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+        <label className="col-span-12 flex flex-col gap-1 md:col-span-6">
+          <span className="text-xs font-medium text-slate-600">Email</span>
+          <input
+            name="email"
+            value={details.email || ""}
+            onChange={onChange}
+            className="rounded border border-blue-100 bg-white px-3 py-1.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-100"
+            placeholder="Optional"
+          />
+        </label>
+        {fieldError && <p className="col-span-12 text-xs font-medium text-red-500">{fieldError}</p>}
+      </div>
     </div>
   );
 }

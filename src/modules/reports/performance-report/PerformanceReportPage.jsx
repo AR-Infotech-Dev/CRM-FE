@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@auth/components/AuthProvider";
 import ModulePageLayout from "../../shared/ModulePageLayout";
 import PerformanceReportWorkspace from "./components/PerformanceReportWorkspace";
@@ -8,6 +8,10 @@ import "./reports.css";
 
 function PerformanceReportPage({ menu_id }) {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const showDateFilter = location.state?.fromTopBar === true;
+  const fromUserWiseReport = location.state?.fromUserWiseReport === true;
   const { authSession } = useAuth();
   const user = authSession?.user || {};
   const {
@@ -48,6 +52,7 @@ function PerformanceReportPage({ menu_id }) {
           loading={loading}
           exporting={exporting}
           canExport={canExport && Boolean(appliedFilters.user_id)}
+          showDateFilter={showDateFilter}
           onFilterChange={setFilters}
           onSearch={handleSearch}
           onReset={handleReset}
@@ -61,7 +66,17 @@ function PerformanceReportPage({ menu_id }) {
           onTicketSearchChange={handleTicketSearchChange}
           onSortChange={handleSortChange}
           onPageChange={setPage}
-          onOpenDetail={() => navigate(`/reports/performance/${appliedFilters.user_id}`)}
+          onOpenDetail={() =>
+            navigate(`/reports/performance/${appliedFilters.user_id}`, {
+              state: {
+                fromTopBar: showDateFilter,
+                performanceFilters: {
+                  fromDate: filters.from_date || "",
+                  toDate: filters.to_date || "",
+                },
+              },
+            })
+          }
         />
       }
     />
