@@ -1,4 +1,5 @@
-import { Building2, ChevronDown, LogOut, Menu, UserRound, } from "lucide-react";
+import { Building2, ChevronDown, FileBarChart, LogOut, Menu, UserRound, } from "lucide-react";
+
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Spinner from "./ui/Spinner";
@@ -18,12 +19,35 @@ function TopBar({ onLogout, onMenuToggle, isMenuOpen = false }) {
   const [isProfileOpen, setProfileOpen] = useState(false);
 
   const profileMenuRef = useRef(null);
+  const handlePerformanceRedirect = () => {
 
+    if (!userId) {
+      console.error("Logged-in user ID not found");
+      return;
+    }
+    const today = new Date();
+    const currentFromDate = new Date( today.getFullYear(), today.getMonth(), 1 ) .toISOString() .split("T")[0];
+    const currentToDate = today.toISOString().split("T")[0];
+
+    navigate(`/reports/performance/${userId}`, {
+      state: {
+        fromTopBar: true,
+        performanceFilters: {
+          fromDate: currentFromDate,
+          toDate: currentToDate,
+        },
+      },
+    });
+  }
   const user = useMemo(
     () => authSession?.user || storedUser || {},
     [authSession?.user, storedUser]
   );
-
+  const userId =
+    user?.adminID ||
+    user?.adminId ||
+    user?.user_id ||
+    user?.id;
   const companyName = getCompanyName(user);
 
   useEffect(() => {
@@ -79,14 +103,14 @@ function TopBar({ onLogout, onMenuToggle, isMenuOpen = false }) {
               <span className="ml-1 absolute animate-bounce">👋</span>
             </h5>
             <h5 className="capitalize relative text-xs">
-               {user?.role_slug || "User"}
+              {user?.role_slug || "User"}
             </h5>
           </div>
         </div>
         <div className="topbar-right">
           {companyName && (
             <span className="topbar-company" title={companyName}>
-              
+
               <Building2 size={14} />
               <span>{companyName}</span>
             </span>
@@ -139,6 +163,14 @@ function TopBar({ onLogout, onMenuToggle, isMenuOpen = false }) {
                 >
                   <UserRound size={14} />
                   Profile
+                </button>
+                <button
+                  type="button"
+                  className="profile-dropdown-item"
+                  onClick={handlePerformanceRedirect}
+                >
+                  <FileBarChart size={14} />
+                  Performance Report
                 </button>
 
                 <button

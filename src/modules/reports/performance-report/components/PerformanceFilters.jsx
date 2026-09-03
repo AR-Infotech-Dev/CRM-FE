@@ -7,6 +7,7 @@ function PerformanceFilters({
   statuses = [],
   loading,
   exporting,
+  showDateFilter = false,
   canExport,
   onChange,
   onSearch,
@@ -22,6 +23,7 @@ function PerformanceFilters({
   };
 
   return (
+    
     <div className="performance-filters">
       <div className="performance-filter-grid">
         <label className="performance-field">
@@ -33,7 +35,7 @@ function PerformanceFilters({
                 {user.label}
               </option>
             ))}
-          </select>
+          </select> 
         </label>
 
         <label className="performance-field">
@@ -93,5 +95,4 @@ function PerformanceFilters({
     </div>
   );
 }
-
 export default PerformanceFilters;
