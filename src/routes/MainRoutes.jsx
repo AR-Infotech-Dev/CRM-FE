@@ -34,6 +34,8 @@ const FeedbackModulePage = lazy(() => import("@modules/feedbacks/FeedbacksModule
 const AmcticketsModulePage = lazy(() => import("@modules/amc-tickets/AmcticketsModulePage"));
 const QuotationModulePage = lazy(() => import("@modules/quotation/QuotationsModulePage"));
 const LeadsModulePage = lazy(() => import("@modules/leads/LeadsModulePage"));
+const CompanySettingModulePage = lazy(() => import("@modules/company-setting/CompanySettingModulePage"));
+
 
 
 const withPermission = (menuId, element) => (
@@ -67,10 +69,11 @@ const menuRouteComponents = {
   "/access-control": AccessControlModulePage,
   "/subscriptions": SubscriptionModulePage,
   "/reviews": FeedbackModulePage,
-  "/amctickets": AmcticketsModulePage
-  ,"/quotations": QuotationModulePage
-  ,"/leads": LeadsModulePage
-  ,"/lead": LeadsModulePage
+  "/amctickets": AmcticketsModulePage,
+  "/company-setting": CompanySettingModulePage,
+  "/quotations": QuotationModulePage,
+  "/leads": LeadsModulePage,
+  "/lead": LeadsModulePage,
 };
 
 function DefaultMenuRedirect() {
