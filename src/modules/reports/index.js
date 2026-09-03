@@ -1,6 +1,7 @@
 export { default as PerformanceReportPage } from "./performance-report/PerformanceReportPage";
 export { default as UserPerformancePage } from "./performance-report/UserPerformancePage";
 export { default as CompanyCustomerTicketReport } from "./customer-wise-report/CompanyCustomerTicketReport";
+export { default as CompanyUserTicketReport } from "./user-wise-performance-report/CompanyUserReport";
 export { default as UserAttendanceReport } from "./attendance-report/UserAttendanceReport";
 export { default as WorkReportModulePage } from "./work-report/WorkReportModulePage";
 export { default as CustomerReport } from "./customer-report/CustomerReport";

@@ -22,6 +22,7 @@ const CompanyMasterModulePage = lazy(() => import("@modules/company-master/Compa
 const AccessControlModulePage = lazy(() => import("@modules/access-control/AccessControlModulePage"));
 const PerformanceReportPage = lazy(() => import("@modules/reports/performance-report/PerformanceReportPage"));
 const UserPerformancePage = lazy(() => import("@modules/reports/performance-report/UserPerformancePage"));
+const UserWisePerformanceReport = lazy(() => import("@modules/reports/user-wise-performance-report/UserWisePerformanceReport"));
 const CompanyCustomerTicketReport = lazy(() => import("@modules/reports/customer-wise-report/CompanyCustomerTicketReport"));
 const UserWiseAttendanceReport = lazy(() => import("@modules/reports/user-wise-attendance-report/UserWiseAttendanceReport"));
 const UserAttendanceReport = lazy(() => import("@modules/reports/attendance-report/UserAttendanceReport"));
@@ -70,6 +71,7 @@ const menuRouteComponents = {
   "/subscriptions": SubscriptionModulePage,
   "/reviews": FeedbackModulePage,
   "/amctickets": AmcticketsModulePage,
+  "/reports/user-performance": UserPerformancePage,
   "/company-setting": CompanySettingModulePage,
   "/quotations": QuotationModulePage,
   "/leads": LeadsModulePage,
@@ -99,7 +101,7 @@ function RouteFallback({ loading }) {
 }
 
 function PageLoader() {
-  return <FlowupSLoader/>;
+  return <FlowupSLoader />;
 }
 
 function NoMenuPermission() {
@@ -190,11 +192,6 @@ function MainRoutes() {
     const reportMenu = flattenMenus(menus).find((menu) => normalizePath(getMenuLink(menu)) === "/reports/performance");
     return getMenuId(reportMenu);
   }, [menus]);
-  
-  const workReportMenuId = useMemo(() => {
-    const reportMenu = flattenMenus(menus).find((menu) => ["/work-report", "/reports/work-report"].includes(normalizePath(getMenuLink(menu))));
-    return getMenuId(reportMenu);
-  }, [menus]);
 
   return (
     <Suspense fallback={<PageLoader />}>
@@ -203,45 +200,16 @@ function MainRoutes() {
         {getAuthRoutes()}
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
+
             {/* CUSTOM ROUTES */}
             <Route path="/profile" element={<UserProfilePage />} />
-            <Route
-              path="/reports/performance"
-              element={
-                performanceReportMenuId
-                  ? withPermission(performanceReportMenuId, <PerformanceReportPage menu_id={performanceReportMenuId} />)
-                  : <PerformanceReportPage menu_id={performanceReportMenuId} />
-              }
-            />
-            <Route
-              path="/reports/performance/:userId"
-              element={
-                performanceReportMenuId
-                  ? withPermission(performanceReportMenuId, <UserPerformancePage menu_id={performanceReportMenuId} />)
-                  : <UserPerformancePage menu_id={performanceReportMenuId} />
-              }
-            />
-            <Route
-              path="/work-report"
-              element={
-                workReportMenuId
-                  ? withPermission(workReportMenuId, <WorkReportModulePage menu_id={workReportMenuId} />)
-                  : <WorkReportModulePage menu_id={workReportMenuId} />
-              }
-            />
-            <Route
-              path="/reports/work-report"
-              element={
-                workReportMenuId
-                  ? withPermission(workReportMenuId, <WorkReportModulePage menu_id={workReportMenuId} />)
-                  : <WorkReportModulePage menu_id={workReportMenuId} />
-              }
-            />
+            <Route path="/reports/performance/:userId" element={<UserPerformancePage menu_id={performanceReportMenuId} />} />
+            <Route path="/reports/performance/:userId" element={ performanceReportMenuId ? withPermission(performanceReportMenuId, <UserPerformancePage menu_id={performanceReportMenuId} />) : <UserPerformancePage menu_id={performanceReportMenuId} /> } />
+            <Route path="/reports/performance" element={<UserWisePerformanceReport />} />
             <Route path="/customer/report/:customerId" element={<CustomerReport />} />
             <Route path="/reports/customer-wise" element={<CompanyCustomerTicketReport />} />
-            {/* <Route path="/reports/user-wise-attendance"element={<UserWiseAttendanceTicketReport />}/> */}
-            {/* <Route path="/reports/attendance" element={<UserWiseAttendanceReport />} /> */}
             <Route path="/dashboard/product-expiry" element={<ProductExpiryReport />} />
+           
             {/* ROUTES FROM MENU MASTER */}
             {dynamicRoutes.map((route) => (
               <Route key={`${route.path}-${route.menuId}`} path={route.path} element={route.element} />
@@ -254,5 +222,4 @@ function MainRoutes() {
     </Suspense>
   );
 }
-
 export default MainRoutes;

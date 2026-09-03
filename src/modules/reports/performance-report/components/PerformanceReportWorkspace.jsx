@@ -5,7 +5,7 @@ import PerformanceCharts from "./PerformanceCharts";
 import PerformanceFilters from "./PerformanceFilters";
 import PerformanceTable from "./PerformanceTable";
 
-function PerformanceReportWorkspace({ filters, users, companies, statuses, loading, exporting, canExport, onFilterChange, onSearch, onReset, onExportExcel, onExportPdf, hasSelection, selectedUserName, report, searchText, sortConfig, onTicketSearchChange, onSortChange, onPageChange, onOpenDetail, }) {
+function PerformanceReportWorkspace({ filters, users, companies, statuses, loading, exporting, canExport,showDateFilter, onFilterChange, onSearch, onReset, onExportExcel, onExportPdf, hasSelection, selectedUserName, report, searchText, sortConfig, onTicketSearchChange, onSortChange, onPageChange, onOpenDetail, }) {
   return (
     <div className="performance-workspace">
       <aside className="performance-filter-sidebar">
@@ -21,6 +21,7 @@ function PerformanceReportWorkspace({ filters, users, companies, statuses, loadi
           loading={loading}
           exporting={exporting}
           canExport={canExport}
+          showDateFilter={showDateFilter}
           onChange={onFilterChange}
           onSearch={onSearch}
           onReset={onReset}
