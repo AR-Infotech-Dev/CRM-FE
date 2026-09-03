@@ -2,7 +2,7 @@ import { readonly, z } from "zod";
 import { buildFallbackColumnsFromKeys } from "../../../utils/moduleStructure";
 import CustomerRowTemplate from "../components/CustomerRowTemplate"
 import AssigneeRowTemplate from "../components/AssigneeRowTemplate";
-// const auth_id = window.localStorage.getItem('auth_id')
+// const auth_id = window.localStorage.getItem('auth_id');
 const FIXED_TABLE_COLUMNS = [
   { key: "select", className: "check-col", checkbox: true, width: 42, minWidth: 42, resizable: false },
 ];

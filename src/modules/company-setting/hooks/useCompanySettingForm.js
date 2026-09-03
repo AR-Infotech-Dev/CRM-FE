@@ -12,7 +12,7 @@ import {
   uploadCompanyLogo,
   uploadHappyClientLogos,
   uploadCompanySignature,
-} from "@modules/company-master/data/companyMaster.service";
+} from "@modules/company-setting/data/companySetting.service";
 import {
   buildMailConfigPayload,
   getCompanyIdentifier,

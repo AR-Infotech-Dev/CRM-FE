@@ -1,29 +1,6 @@
 import { makeRequest } from "@/api/httpClient";
 import { companySettingSchema } from "./module.schema";
 
-export const getCompanyList = async ({ filterState, page }) => {
-  return await makeRequest(companySettingSchema.api.list, {
-    method: "POST",
-    body: {
-      page,
-      searchText: filterState.searchText,
-      filters: filterState.filters,
-      order: filterState.order,
-      order_by: filterState.order_by,
-    },
-  });
-};
-
-export const deleteCompanies = async (selectedRowIds) => {
-  return await makeRequest(companySettingSchema.api.delete, {
-    method: "POST",
-    body: {
-      action: "delete",
-      ids: selectedRowIds,
-    },
-  });
-};
-
 export const getCompanyDetails = async (companyId) => {
   return await makeRequest(`${companySettingSchema.api.edit}/${companyId}`, {
     method: "GET",
@@ -68,6 +45,37 @@ export const removeCompanyLogo = async (companyId) => {
   });
 };
 
+export const uploadCompanySignature = async ({ companyId, file }) => {
+  const uploadFormData = new FormData();
+  uploadFormData.append("signature", file);
+
+  return await makeRequest(companySettingSchema.api.signatureUpload.replace(":id", companyId), {
+    method: "POST",
+    body: uploadFormData,
+  });
+};
+
+export const removeCompanySignature = async (companyId) => {
+  return await makeRequest(companySettingSchema.api.signatureRemove.replace(":id", companyId), {
+    method: "DELETE",
+    body: {},
+  });
+};
+
+export const uploadHappyClientLogos = async ({ companyId, files }) => {
+  const uploadFormData = new FormData();
+  files.slice(0, 5).forEach((file) => uploadFormData.append("logos", file));
+  return await makeRequest(companySettingSchema.api.happyClientLogosUpload.replace(":id", companyId), {
+    method: "POST",
+    body: uploadFormData,
+  });
+};
+
+export const removeHappyClientLogos = async (companyId) => makeRequest(
+  companySettingSchema.api.happyClientLogosRemove.replace(":id", companyId),
+  { method: "DELETE", body: {} },
+);
+
 export const testCompanyMailConnection = async (payload) => {
   return await makeRequest(companySettingSchema.api.testMail, {
     method: "POST",
@@ -83,7 +91,7 @@ export const testCompanyDBConnection = async (payload) => {
   });
 };
 export const exportCompanyDb = async (company) => {
-  const res = await makeRequest(`${companySettingSchema.api.edit}/${company.company_id}/export-db`, {
+  const res = await makeRequest(companySettingSchema.api.exportDB.replace(":id", company.company_id), {
     method: "GET",
     responseType: "blob",
     timeout: 120000,

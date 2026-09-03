@@ -32,16 +32,11 @@ export const companySettingSchema = {
   menu_id: null,
   primaryKey: "company_id",
   api: {
-    list: "/company-setting",
-    delete: "/company-setting/delete",
-    create: "/company-setting/create",
     edit: "/companies/company-setting",
-    testMail: "/company-setting/mail-config/test",
-    testDB: "/company-setting/db-config/test",
-    logoUpload: "/company-setting/logo",
-    logoRemove: "/company-setting/:id/logo/remove",
-    definitions: "/system/getDefinations",
-    definitionsFallback: "/system/getstructure",
+    testMail: "/companies/mail-config/test",
+    testDB: "/companies/db-config/test",
+    logoUpload: "/companies/logo",
+    logoRemove: "/companies/:id/logo/remove",
   },
   definitionRequest: {
     menuIDField: "menu_id",
@@ -230,7 +225,7 @@ export const companySettingSchema = {
         columns: 3,
         fields: [
           { name: "quotation_terms", plain_text: false, required: true, label: "Terms and conditions", type: "editor", placeholder: "Provide terms and condition...", gridSpan: 12 },
-          
+
 
           {
             name: "authority_sign",
