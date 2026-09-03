@@ -33,6 +33,10 @@ const UserMarkers = lazy(() => import("@modules/dashboard/UserMarkers"));
 const UserProfilePage = lazy(() => import("@modules/profile/UserProfilePage"));
 const FeedbackModulePage = lazy(() => import("@modules/feedbacks/FeedbacksModulePage"));
 const AmcticketsModulePage = lazy(() => import("@modules/amc-tickets/AmcticketsModulePage"));
+const QuotationModulePage = lazy(() => import("@modules/quotation/QuotationsModulePage"));
+const LeadsModulePage = lazy(() => import("@modules/leads/LeadsModulePage"));
+const CompanySettingModulePage = lazy(() => import("@modules/company-setting/CompanySettingModulePage"));
+
 
 
 const withPermission = (menuId, element) => (
@@ -68,6 +72,10 @@ const menuRouteComponents = {
   "/reviews": FeedbackModulePage,
   "/amctickets": AmcticketsModulePage,
   "/reports/user-performance": UserPerformancePage,
+  "/company-setting": CompanySettingModulePage,
+  "/quotations": QuotationModulePage,
+  "/leads": LeadsModulePage,
+  "/lead": LeadsModulePage,
 };
 
 function DefaultMenuRedirect() {
@@ -147,7 +155,7 @@ function MainRoutes() {
           setMenus(stored);
           return;
         }
-        const nextMenus = await fetchMenuList("ithech mainroutes madhe", {
+        const nextMenus = await fetchMenuList({
           fallbackPermissions: getStoredPermissions(),
         });
         saveMenuList(nextMenus);

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import ActionButton from "../../components/ui/ActionButton";
 import Spinner from "../../components/ui/Spinner";
+import { confirmDelete } from "@utils/confirmDelete";
 function ModuleControls({
   loading,
   onCreate,
@@ -69,7 +70,12 @@ function ModuleControls({
             <>
               {/* Delete button is shown only when delete permission exists and rows are selected. */}
               {canDelete && showDelete &&
-                <ActionButton onClick={onDeleteSelected} disabled={deleteDisabled}>
+                <ActionButton
+                  onClick={async () => {
+                    if (await confirmDelete({ title: "Delete selected records?" })) onDeleteSelected?.();
+                  }}
+                  disabled={deleteDisabled}
+                >
                   {deleting ? <Spinner /> : <Trash2 size={15} color="var(--primary)" />}
                   {/* {deleteLabel} */}
                 </ActionButton>
