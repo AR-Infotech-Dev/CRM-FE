@@ -106,6 +106,9 @@ export const categoryModuleSchema = {
       description: null,
       status: "active",
       is_sys_category: "no",
+      categories_index: "",
+      
+
     },
     sections: [
       {
@@ -148,16 +151,18 @@ export const categoryModuleSchema = {
           {
             name: "parent_id",
             label: "Select Parent Category",
-            type: "smartSelect",
+            type: "smartSelectInput",
             id: "parent_id",
             required: true,
             visibleWhen: (values) => values.is_parent === "no",
             readOnlyWhen: (values) => values.is_sys_category === "yes",
             config: {
               apiUrl: "/system/searchList",
-              tableName: "categories",
-              selectFields: "category_id,categoryName",
-              searchField: "categoryName",
+              type: "parent-category",
+              source: "categories",
+              list: "category_id,categoryName",
+              check: "categoryName",
+              preload: true,
               labelKey: "categoryName",
               valueKey: "category_id",
               placeholder: "Select Parent Category",
@@ -201,18 +206,19 @@ export const categoryModuleSchema = {
             name: "status",
             label: "Status",
             type: "radio",
-            gridSpan: 12,
+            gridSpan: 6,
             options: [
               { value: "active", label: "Active" },
               { value: "inactive", label: "Inactive" },
             ],
           },
+         
         ],
       },
     ],
   },
   validationSchema: z.object({
-    categoryName: z.preprocess( (value) => value ?? "", z.string().trim().min(1, "Category name is required") ),
+    categoryName: z.preprocess((value) => value ?? "", z.string().trim().min(1, "Category name is required")),
     slug: z.string().trim().min(1, "Slug is required"),
     is_parent: z.enum(["yes", "no"]),
     parent_id: z.any().optional(),

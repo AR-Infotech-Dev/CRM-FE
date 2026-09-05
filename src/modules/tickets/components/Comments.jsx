@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { makeRequest } from "../../../api/httpClient";
 import ProfileAvatar from "../../../components/ui/ProfileAvatar";
 import { formatRelativeTime } from "../../../utils/common";
+import { confirmDelete } from "@utils/confirmDelete";
 
 const DEFAULT_ENDPOINTS = {
   list: "comments",
@@ -196,6 +197,8 @@ function Comments({ COMMENTS = [], module = "tickets", ticket_id, module_id, end
       return;
     }
 
+    if (!await confirmDelete({ itemLabel: "comment" })) return;
+
     try {
       setDeletingId(commentId);
       const res = await makeRequest(api.delete, {
@@ -375,15 +378,15 @@ function Comments({ COMMENTS = [], module = "tickets", ticket_id, module_id, end
           />
           <div className="flex items-center justify-between rounded-b-md bg-slate-50 px-3 py-2">
             <div className="flex items-center gap-4 text-slate-500">
-              <button type="button" className="hover:text-blue-600" aria-label="Mention">
+              {/* <button type="button" className="hover:text-blue-600" aria-label="Mention">
                 <AtSign size={15} />
-              </button>
-              <button type="button" className="hover:text-blue-600" aria-label="Attach file">
+              </button> */}
+              {/* <button type="button" className="hover:text-blue-600" aria-label="Attach file">
                 <Paperclip size={15} />
-              </button>
-              <button type="button" className="hover:text-blue-600" aria-label="Emoji">
+              </button> */}
+              {/* <button type="button" className="hover:text-blue-600" aria-label="Emoji">
                 <Smile size={15} />
-              </button>
+              </button> */}
             </div>
             <button
               type="button"

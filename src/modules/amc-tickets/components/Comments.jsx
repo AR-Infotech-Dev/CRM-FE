@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { makeRequest } from "../../../api/httpClient";
 import ProfileAvatar from "../../../components/ui/ProfileAvatar";
 import { formatRelativeTime } from "../../../utils/common";
+import { confirmDelete } from "@utils/confirmDelete";
 
 const DEFAULT_ENDPOINTS = {
   list: "comments",
@@ -196,6 +197,8 @@ function Comments({ COMMENTS = [], module = "amctickets", amcticket_id, module_i
       toast.error("Comment id not found");
       return;
     }
+
+    if (!await confirmDelete({ itemLabel: "comment" })) return;
 
     try {
       setDeletingId(commentId);

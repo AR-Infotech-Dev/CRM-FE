@@ -79,8 +79,6 @@ export const useCategoriesModule = ({ filterState }) => {
       return;
     }
 
-    if (!window.confirm("Delete this category?")) return;
-
     const action = await dispatch(deleteCategoryItems([rowId]));
 
     if (deleteCategoryItems.fulfilled.match(action)) {

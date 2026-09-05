@@ -72,8 +72,6 @@ export const useUsersModule = ({ filterState }) => {
     const handleDeleteRow = async (row) => {
         const rowId = row?._id ?? row?.id ?? row?.adminID;
         if (!rowId) { toast.error("User id not found."); return; }
-        if (!window.confirm("Delete this user?")) return;
-
         const action = await dispatch(deleteUsers([rowId]));
 
         if (deleteUsers.fulfilled.match(action)) {
