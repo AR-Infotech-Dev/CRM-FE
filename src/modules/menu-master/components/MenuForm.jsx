@@ -17,11 +17,12 @@ function MenuForm({ isOpen, onClose, selectedMenu, onAfterSave, menu_id: permiss
     handleClose,
   } = useMenuForm({ isOpen, onClose, selectedMenu, onAfterSave });
 
-  if (!isOpen) return null;
+
 
   return (
     <FlyoutPanel
       isOpen={isOpen}
+      loading={fetchingMenu}
       onClose={handleClose}
       title={selectedMenu ? "Edit Menu" : "Create Menu"}
       panelClassName="!w-[540px] max-w-full"
@@ -43,11 +44,7 @@ function MenuForm({ isOpen, onClose, selectedMenu, onAfterSave, menu_id: permiss
     >
       <div className="flyout-form-shell">
         <div className="ws-main-container">
-          {fetchingMenu ? (
-            <div className="p-5 text-center">
-              <Spinner />
-            </div>
-          ) : (
+          
             <div className="rounded-xl bg-white px-4 py-3">
               <DynamicModuleForm
                 sections={menuMasterSchema.form.sections}
@@ -57,7 +54,7 @@ function MenuForm({ isOpen, onClose, selectedMenu, onAfterSave, menu_id: permiss
                 menuId={permissionMenuId}
               />
             </div>
-          )}
+          
         </div>
       </div>
     </FlyoutPanel>

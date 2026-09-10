@@ -48,12 +48,11 @@ function CategoryForm({ isOpen, onClose, selectedCategory, onAfterSave, menu_id 
     }
 };
 
-  if (!isOpen) {
-    return null;
-  }
+
   return (
     <FlyoutPanel
       isOpen={isOpen}
+      loading={fetchingCategory}
       onClose={handleClose}
       title={selectedCategory ? "Edit Category" : "Create Category"}
       closeButton={
@@ -79,11 +78,7 @@ function CategoryForm({ isOpen, onClose, selectedCategory, onAfterSave, menu_id 
     >
       <div className="flyout-form-shell">
         <div className="ws-main-container">
-          {fetchingCategory ? (
-            <div className="p-5 text-center">
-              <Spinner />
-            </div>
-          ) : (
+          
             <div className="rounded-xl bg-white px-4 py-3">
               <DynamicModuleForm
                 sections={categoryModuleSchema.form.sections}
@@ -100,7 +95,7 @@ function CategoryForm({ isOpen, onClose, selectedCategory, onAfterSave, menu_id 
                 />
               )}
             </div>
-          )}
+          
         </div>
       </div>
     </FlyoutPanel>

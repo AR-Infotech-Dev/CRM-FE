@@ -10,10 +10,10 @@ const EMPTY_INITIAL_VALUES = {};
 
 function LeadForm({ isOpen, onClose, selectedLead, initialValues = EMPTY_INITIAL_VALUES, onAfterSave, menu_id }) {
   const form = useLeadForm({ isOpen, onClose, selectedLead, initialValues, onAfterSave });
-  if (!isOpen) return null;
+
 
   return (
-    <FlyoutPanel
+    <FlyoutPanel loading={form.fetchingLead}
       isOpen={isOpen}
       onClose={form.handleClose}
       title={selectedLead ? "Edit Lead" : "Create Lead"}
@@ -27,8 +27,7 @@ function LeadForm({ isOpen, onClose, selectedLead, initialValues = EMPTY_INITIAL
       </div>}
     >
       <div className="flyout-form-shell"><div className="ws-main-container">
-        {form.fetchingLead ? <div className="p-5 text-center"><Spinner /></div> : (
-          <div className="rounded-xl bg-white px-4 py-3">
+        {<div className="rounded-xl bg-white px-4 py-3">
             <DynamicModuleForm
               sections={leadsModuleSchema.form.sections}
               values={form.formData}
@@ -37,8 +36,7 @@ function LeadForm({ isOpen, onClose, selectedLead, initialValues = EMPTY_INITIAL
               errors={form.errors}
               menuId={menu_id}
             />
-          </div>
-        )}
+          </div>}
       </div></div>
     </FlyoutPanel>
   );

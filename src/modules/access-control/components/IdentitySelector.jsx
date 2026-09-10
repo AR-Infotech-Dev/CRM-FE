@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { makeRequest } from "../../../api/httpClient";
 import { usersModuleSchema } from "../../users/data/module.schema";
 import { normalizeUserIdentity } from "../data/helper";
+import SpinnerIllustration from "@/components/ui/SpinnerIllustration";
 
 function IdentitySelector({ companyId, selectedIdentity, onSelect }) {
   const [identities, setIdentities] = useState([]);
@@ -90,7 +91,7 @@ function IdentitySelector({ companyId, selectedIdentity, onSelect }) {
         <div className="max-h-[calc(100vh-250px)] space-y-2 overflow-y-auto pr-1">
           {loading && (
             <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-3 text-center text-xs text-slate-500">
-              Loading users...
+              <SpinnerIllustration/>
             </div>
           )}
           {!loading && identities.length === 0 && (
@@ -98,15 +99,14 @@ function IdentitySelector({ companyId, selectedIdentity, onSelect }) {
               No users found
             </div>
           )}
-          {identities.map((identity) => (
+          {!loading && identities.map((identity) => (
             <button
               type="button"
               key={identity.id}
-              className={`flex w-full items-center gap-3 rounded-md border px-3 py-2 text-left transition-colors ${
-                selectedIdentity?.id === identity.id
+              className={`flex w-full items-center gap-3 rounded-md border px-3 py-2 text-left transition-colors ${selectedIdentity?.id === identity.id
                   ? "border-blue-200 bg-blue-50"
                   : "border-slate-200 bg-white hover:bg-slate-50"
-              }`}
+                }`}
               onClick={() => onSelect?.(identity)}
             >
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-800 text-[10px] font-bold text-white">

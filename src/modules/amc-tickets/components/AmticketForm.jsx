@@ -163,11 +163,11 @@ function AmcticketForm({ isOpen, onClose, selectedAmcticket, onAfterSave, menu_i
       })
       : TAB_ITEMS.filter(([key]) => key === "client");
 
-  if (!isOpen) return null;
+
 
   return (
     <>
-      <FlyoutPanel
+      <FlyoutPanel loading={fetchingAmcticket}
         isOpen={isOpen}
         onClose={handleClose}
         title={selectedAmcticket ? "Edit ticket" : "Create ticket"}
@@ -199,12 +199,7 @@ function AmcticketForm({ isOpen, onClose, selectedAmcticket, onAfterSave, menu_i
       >
         <div className="flyout-form-shell amcticket-form-shell">
           <div className="ws-main-container">
-            {fetchingAmcticket ? (
-              <div className="p-5 text-center">
-                <Spinner />
-              </div>
-            ) : (
-              <div className="amcticket-drawer-layout grid grid-cols-12 overflow-hidden rounded-xl bg-white">
+            {<div className="amcticket-drawer-layout grid grid-cols-12 overflow-hidden rounded-xl bg-white">
                 <div className="amcticket-scroll-pane col-span-12 min-w-0 overflow-y-auto border-r border-slate-200 px-4 py-2 lg:col-span-6 xl:col-span-7">
                   <DynamicModuleForm
                     sections={FORM_SECTIONS_BEFORE_CONTACT}
@@ -271,8 +266,7 @@ function AmcticketForm({ isOpen, onClose, selectedAmcticket, onAfterSave, menu_i
                     {tab === "visits" && mode === "edit" && formData.visit_required === "y" && <Visits amcticket={formData} amcticket_id={ticketId} />}
                   </div>
                 </div>
-              </div>
-            )}
+              </div>}
           </div>
         </div>
       </FlyoutPanel>

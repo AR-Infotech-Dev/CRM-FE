@@ -1,3 +1,4 @@
+import SpinnerIllustration from "@/components/ui/SpinnerIllustration";
 import { accessPermissionColumns } from "../data/accessControlData";
 import PermissionToggle from "./PermissionToggle";
 
@@ -51,68 +52,68 @@ function PermissionsMatrix({
         <PermissionsEmptyState />
       ) : loadingPermissions ? (
         <div className="flex min-h-[420px] items-center justify-center text-sm text-slate-500">
-          Loading permissions...
+          <SpinnerIllustration />
         </div>
       ) : (
-      <div className="overflow-x-auto">
-        <div className="min-w-[680px]">
-          <div className="grid grid-cols-[minmax(180px,1fr)_80px_80px_80px_80px_110px] border-b border-slate-200 bg-slate-50 px-4 py-2 text-[11px] font-bold uppercase tracking-wide text-slate-500">
-            <div>Module</div>
-            {accessPermissionColumns.map((column) => (
-              <div key={column.key} className="text-center">
-                {column.label}
-              </div>
-            ))}
-            <div className="text-center">Advanced</div>
+        <div className="overflow-x-auto">
+          <div className="min-w-[680px]">
+            <div className="grid grid-cols-[minmax(180px,1fr)_80px_80px_80px_80px_110px] border-b border-slate-200 bg-slate-50 px-4 py-2 text-[11px] font-bold uppercase tracking-wide text-slate-500">
+              <div>Module</div>
+              {accessPermissionColumns.map((column) => (
+                <div key={column.key} className="text-center">
+                  {column.label}
+                </div>
+              ))}
+              <div className="text-center">Advanced</div>
+            </div>
+
+            {modules.map((module) => {
+              const Icon = module.icon;
+
+              return (
+                <div
+                  key={module.id}
+                  className="grid min-h-11 grid-cols-[minmax(180px,1fr)_80px_80px_80px_80px_110px] items-center border-b border-slate-100 px-4 text-xs text-slate-700 last:border-b-0 hover:bg-slate-50"
+                >
+                  <div className="flex min-w-0 items-center gap-2 font-medium text-slate-800">
+                    <Icon size={15} className="shrink-0 text-slate-400" />
+                    <span className="truncate">{module.name}</span>
+                  </div>
+
+                  {accessPermissionColumns.map((column) => {
+                    const supported = Boolean(module.supports[column.key]);
+                    const disabled = !supported || (column.key !== "view" && !module.permissions.view);
+
+                    return (
+                      <div key={column.key} className="text-center">
+                        {supported ? (
+                          <PermissionToggle
+                            checked={Boolean(module.permissions[column.key])}
+                            disabled={disabled}
+                            onChange={(nextValue) => onPermissionChange(module.id, column.key, nextValue)}
+                          />
+                        ) : (
+                          <span className="text-slate-300">-</span>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      disabled={!module.permissions.view}
+                      className="text-xs font-semibold text-blue-600 hover:text-blue-700 disabled:cursor-not-allowed disabled:text-slate-300"
+                      onClick={() => onConfigure(module.id)}
+                    >
+                      Configure
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-
-          {modules.map((module) => {
-            const Icon = module.icon;
-
-            return (
-              <div
-                key={module.id}
-                className="grid min-h-11 grid-cols-[minmax(180px,1fr)_80px_80px_80px_80px_110px] items-center border-b border-slate-100 px-4 text-xs text-slate-700 last:border-b-0 hover:bg-slate-50"
-              >
-                <div className="flex min-w-0 items-center gap-2 font-medium text-slate-800">
-                  <Icon size={15} className="shrink-0 text-slate-400" />
-                  <span className="truncate">{module.name}</span>
-                </div>
-
-                {accessPermissionColumns.map((column) => {
-                  const supported = Boolean(module.supports[column.key]);
-                  const disabled = !supported || (column.key !== "view" && !module.permissions.view);
-
-                  return (
-                    <div key={column.key} className="text-center">
-                      {supported ? (
-                        <PermissionToggle
-                          checked={Boolean(module.permissions[column.key])}
-                          disabled={disabled}
-                          onChange={(nextValue) => onPermissionChange(module.id, column.key, nextValue)}
-                        />
-                      ) : (
-                        <span className="text-slate-300">-</span>
-                      )}
-                    </div>
-                  );
-                })}
-
-                <div className="text-center">
-                  <button
-                    type="button"
-                    disabled={!module.permissions.view}
-                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 disabled:cursor-not-allowed disabled:text-slate-300"
-                    onClick={() => onConfigure(module.id)}
-                  >
-                    Configure
-                  </button>
-                </div>
-              </div>
-            );
-          })}
         </div>
-      </div>
       )}
     </section>
   );

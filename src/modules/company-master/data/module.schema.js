@@ -195,21 +195,14 @@ export const companyMasterSchema = {
           { name: "ticket_prefix", label: "Ticket Prefix", type: "text", placeholder: "TKT", required: true, gridSpan: 2, },
           { name: "ticket_prefix_padding", label: "Padding", type: "text", placeholder: "TKT", gridSpan: 2, },
           { name: "ticket_include_year", label: "Include Date", type: "radio", options: [{ label: "Yes", value: "y" }, { label: "No", value: "n" },], gridSpan: 3, },
-<<<<<<< HEAD
-           { name: "ticket_no_reset", label: "Reset preference", type: "radio", options: [{ label: "Daily", value: "daily" }, { label: "Monthly", value: "monthly" }, { label: "Yearly", value: "yearly" },], gridSpan: 3, },
-
+          { name: "ticket_no_reset", label: "Reset preference", type: "radio", options: [{ label: "Daily", value: "daily" }, { label: "Monthly", value: "monthly" }, { label: "Yearly", value: "yearly" },], gridSpan: 5, },
         ],
       },
       {
-
         columns: 2,
         fields: [
-          { name: "google_review_enabled", label: "Google Review Enabled", type: "radio",
-            options: [ { label: "Yes", value: "y" }, { label: "No", value: "n" } ], gridSpan: 4},
-          { name: "google_review_link", label: "Google Review Link", type: "text", placeholder: "Enter Google Review Link", gridSpan: 4,  visibleWhen: (values) => values.google_review_enabled === "y" }
-=======
-          { name: "ticket_no_reset", label: "Reset preference", type: "radio", options: [{ label: "Daily", value: "daily" }, { label: "Monthly", value: "monthly" }, { label: "Yearly", value: "yearly" },], gridSpan: 5, },
->>>>>>> 0aa09f017d41e0d2e02703a05dc0ac85e291b9b0
+          { name: "google_review_enabled", label: "Google Review Enabled", type: "radio", options: [{ label: "Yes", value: "y" }, { label: "No", value: "n" }], gridSpan: 4 },
+          { name: "google_review_link", label: "Google Review Link", type: "text", placeholder: "Enter Google Review Link", gridSpan: 4, visibleWhen: (values) => values.google_review_enabled === "y" },
         ],
       },
       {
@@ -330,28 +323,28 @@ export const companyMasterSchema = {
     happy_client_logos: z.array(z.any()).max(5, "You can upload up to 5 client logos").optional(),
     status: z.enum(["active", "inactive", "delete"]),
   }).superRefine((data, ctx) => {
-  if (data.mail_provider === "custom") {
-    ["smtp_host", "smtp_port", "smtp_encryption", "smtp_username"].forEach((field) => {
-      if (!data[field]) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: [field],
-          message: `${field.replaceAll("_", " ")} is required`,
-        });
-      }
-    });
-  }
-
-  if (data.google_review_enabled === "y") {
-    if (!data.google_review_link?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["google_review_link"],
-        message: "Google Review Link is required",
+    if (data.mail_provider === "custom") {
+      ["smtp_host", "smtp_port", "smtp_encryption", "smtp_username"].forEach((field) => {
+        if (!data[field]) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [field],
+            message: `${field.replaceAll("_", " ")} is required`,
+          });
+        }
       });
     }
-  }
-}),
+
+    if (data.google_review_enabled === "y") {
+      if (!data.google_review_link?.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["google_review_link"],
+          message: "Google Review Link is required",
+        });
+      }
+    }
+  }),
 };
 
 export const companyMasterFallbackColumns = [

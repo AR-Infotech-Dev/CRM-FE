@@ -41,12 +41,10 @@ function CustomerForm({ isOpen, onClose, selectedCustomer, initialValues = EMPTY
     onAfterSave,
   });
 
-  if (!isOpen) {
-    return null;
-  }
+
 
   return (
-    <FlyoutPanel
+    <FlyoutPanel loading={fetchingCustomer}
       isOpen={isOpen}
       onClose={handleClose}
       title={selectedCustomer ? "Edit Customer" : "Create Customer"}
@@ -74,12 +72,7 @@ function CustomerForm({ isOpen, onClose, selectedCustomer, initialValues = EMPTY
     >
       <div className="flyout-form-shell">
         <div className="ws-main-container">
-          {fetchingCustomer ? (
-            <div className="p-5 text-center">
-              <Spinner />
-            </div>
-          ) : (
-            <div className="rounded-xl bg-white px-4 py-3">
+          {<div className="rounded-xl bg-white px-4 py-3">
               <DynamicModuleForm
                 sections={customerModuleSchema.form.sections}
                 values={formData}
@@ -106,8 +99,7 @@ function CustomerForm({ isOpen, onClose, selectedCustomer, initialValues = EMPTY
                 onUpdateProductAddon={updateProductAddon}
                 onRemoveProductAddon={removeProductAddon}
               />
-            </div>
-          )}
+            </div>}
         </div>
       </div>
     </FlyoutPanel>

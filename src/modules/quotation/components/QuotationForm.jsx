@@ -31,11 +31,11 @@ function QuotationForm({ isOpen, onClose, selectedQuotation, onAfterSave, menu_i
     [form.formData.party_id, form.selectedParty]
   );
 
-  if (!isOpen) return null;
+
 
   return (
     <>
-      <FlyoutPanel
+      <FlyoutPanel loading={form.fetchingQuotation}
         isOpen={isOpen}
         onClose={form.handleClose}
         title={selectedQuotation ? `Edit Quotation ${selectedQuotation.quotation_no || ""}` : "Create Quotation"}
@@ -57,10 +57,7 @@ function QuotationForm({ isOpen, onClose, selectedQuotation, onAfterSave, menu_i
           </div>
         )}
       >
-        {form.fetchingQuotation ? (
-          <div className="p-8 text-center"><Spinner /></div>
-        ) : (
-          <div className="quotation-form-layout">
+        {<div className="quotation-form-layout">
             <main className="quotation-form-main">
               <DynamicModuleForm
                 sections={[sections[0]]}
@@ -112,8 +109,7 @@ function QuotationForm({ isOpen, onClose, selectedQuotation, onAfterSave, menu_i
                 <div className="grand"><span>Grand Total</span><b>{formatMoney(form.totals.grand_total)}</b></div>
               </div>
             </aside>
-          </div>
-        )}
+          </div>}
       </FlyoutPanel>
       <LeadForm
         isOpen={form.isLeadFormOpen}

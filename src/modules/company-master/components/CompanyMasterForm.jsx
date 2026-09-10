@@ -32,13 +32,12 @@ function CompanyMasterForm({ isOpen, onClose, selectedCompany, onAfterSave, menu
 
   const EmailConnectionIcon = connectionEmailBadge.icon;
   const DBConnectionBadge = connectionDBBadge.icon;
-  if (!isOpen) {
-    return null;
-  }
+
 
   return (
     <FlyoutPanel
       isOpen={isOpen}
+      loading={fetchingCompany}
       onClose={handleClose}
       title={selectedCompany ? "Edit Company" : "Create Company"}
       panelClassName="!w-[640px] max-w-full"
@@ -85,11 +84,7 @@ function CompanyMasterForm({ isOpen, onClose, selectedCompany, onAfterSave, menu
     >
       <div className="flyout-form-shell">
         <div className="ws-main-container">
-          {fetchingCompany ? (
-            <div className="p-5 text-center">
-              <Spinner />
-            </div>
-          ) : (
+          
             <div className="rounded-sm bg-white px-4 py-3">
               <section className="company-logo-uploader">
                 <div className="company-logo-preview">
@@ -133,7 +128,7 @@ function CompanyMasterForm({ isOpen, onClose, selectedCompany, onAfterSave, menu
                 menuId={menu_id}
               />
             </div>
-          )}
+          
         </div>
       </div>
     </FlyoutPanel>

@@ -7,6 +7,7 @@ import NotificationBell from "./ui/NotificationBell";
 import LoadingBar from "./LoadingBar";
 import { useAuth } from "@auth/components/AuthProvider";
 import Clock from "@components/ui/Clock"
+import { ALLOW_NOTIFICATIONS } from "@/api/config";
 
 const getCompanyName = (user = {}) => user?.company_name || "";
 
@@ -26,7 +27,7 @@ function TopBar({ onLogout, onMenuToggle, isMenuOpen = false }) {
       return;
     }
     const today = new Date();
-    const currentFromDate = new Date( today.getFullYear(), today.getMonth(), 1 ) .toISOString() .split("T")[0];
+    const currentFromDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split("T")[0];
     const currentToDate = today.toISOString().split("T")[0];
 
     navigate(`/reports/performance/${userId}`, {
@@ -115,8 +116,10 @@ function TopBar({ onLogout, onMenuToggle, isMenuOpen = false }) {
               <span>{companyName}</span>
             </span>
           )}
-
-          <NotificationBell />
+          
+          {
+            ALLOW_NOTIFICATIONS && <NotificationBell />
+          }
 
           <div className="topbar-profile-menu" ref={profileMenuRef}>
             <button
@@ -166,15 +169,6 @@ function TopBar({ onLogout, onMenuToggle, isMenuOpen = false }) {
                 </button>
                 <button
                   type="button"
-                  className="profile-dropdown-item"
-                  onClick={handlePerformanceRedirect}
-                >
-                  <FileBarChart size={14} />
-                  Performance Report
-                </button>
-
-                <button
-                  type="button"
                   className="profile-dropdown-item danger"
                   onClick={handleLogout}
                   disabled={isLoggingOut}
@@ -190,7 +184,6 @@ function TopBar({ onLogout, onMenuToggle, isMenuOpen = false }) {
             )}
           </div>
           <div className="topbar-clock"><Clock /></div>
-
         </div>
       </header>
 

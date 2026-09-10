@@ -17,12 +17,10 @@ function ProductForm({ isOpen, onClose, selectedProduct, onAfterSave, menu_id })
     handleSave,
   } = useProductForm({ isOpen, onClose, selectedProduct, onAfterSave });
 
-  if (!isOpen) {
-    return null;
-  }
+
 
   return (
-    <FlyoutPanel
+    <FlyoutPanel loading={fetchingProduct}
       isOpen={isOpen}
       onClose={handleClose}
       title={selectedProduct ? "Edit Product" : "Create Product"}
@@ -50,12 +48,7 @@ function ProductForm({ isOpen, onClose, selectedProduct, onAfterSave, menu_id })
     >
       <div className="flyout-form-shell">
         <div className="ws-main-container">
-          {fetchingProduct ? (
-            <div className="p-5 text-center">
-              <Spinner />
-            </div>
-          ) : (
-            <div className="rounded-xl bg-white px-4 py-3">
+          {<div className="rounded-xl bg-white px-4 py-3">
               <DynamicModuleForm
                 sections={productsModuleSchema.form.sections}
                 values={formData}
@@ -63,8 +56,7 @@ function ProductForm({ isOpen, onClose, selectedProduct, onAfterSave, menu_id })
                 errors={errors}
                 menuId={menu_id}
               />
-            </div>
-          )}
+            </div>}
         </div>
       </div>
     </FlyoutPanel>

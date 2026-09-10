@@ -7,9 +7,7 @@ import { useSubscriptionForm } from "../hooks/useSubscriptionsForm";
 import { subscriptionsModuleSchema } from "../data/module.schema";
 
 function SubscriptionForm({ isOpen, onClose, selectedSubscription, onAfterSave, menu_id }) {
-  if (!isOpen) {
-    return null;
-  }
+
 
   const {
     loading,
@@ -23,7 +21,7 @@ function SubscriptionForm({ isOpen, onClose, selectedSubscription, onAfterSave, 
 
 
   return (
-    <FlyoutPanel
+    <FlyoutPanel loading={fetchingSubscription}
       isOpen={isOpen}
       onClose={handleClose}
       title={selectedSubscription ? "Edit Subscription" : "Create Subscription"}
@@ -46,19 +44,13 @@ function SubscriptionForm({ isOpen, onClose, selectedSubscription, onAfterSave, 
     >
       <div className="flyout-form-shell px-4 py-3">
         <div className="ws-main-container">
-          {fetchingSubscription ? (
-            <div className="p-5 text-center">
-              <Spinner />
-            </div>
-          ) : (
-            <DynamicModuleForm
+          {<DynamicModuleForm
               sections={subscriptionsModuleSchema.form.sections}
               values={formData}
               onChange={handleChange}
               errors={errors}
               menuId={menu_id}
-            />
-          )}
+            />}
         </div>
       </div>
     </FlyoutPanel>

@@ -7,9 +7,7 @@ import { useUserForm } from "../hooks/useUserForm";
 import { usersModuleSchema } from "../data/module.schema";
 
 function UserForm({ isOpen, onClose, selectedUser, onAfterSave, menu_id }) {
-  if (!isOpen) {
-    return null;
-  }
+
 
   const {
     loading,
@@ -25,6 +23,7 @@ function UserForm({ isOpen, onClose, selectedUser, onAfterSave, menu_id }) {
   return (
     <FlyoutPanel
       isOpen={isOpen}
+      loading={fetchingUser}
       onClose={handleClose}
       title={selectedUser ? "Edit User" : "Create User"}
       panelClassName="!w-[640px] max-w-full"
@@ -46,19 +45,13 @@ function UserForm({ isOpen, onClose, selectedUser, onAfterSave, menu_id }) {
     >
       <div className="flyout-form-shell px-4 py-3">
         <div className="ws-main-container">
-          {fetchingUser ? (
-            <div className="p-5 text-center">
-              <Spinner />
-            </div>
-          ) : (
-            <DynamicModuleForm
-              sections={usersModuleSchema.form.sections}
-              values={formData}
-              onChange={handleChange}
-              errors={errors}
-              menuId={menu_id}
-            />
-          )}
+          <DynamicModuleForm
+            sections={usersModuleSchema.form.sections}
+            values={formData}
+            onChange={handleChange}
+            errors={errors}
+            menuId={menu_id}
+          />
         </div>
       </div>
     </FlyoutPanel>
