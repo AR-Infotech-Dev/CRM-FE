@@ -3,7 +3,6 @@ import { CalendarClock, CheckCircle2, Download, RefreshCcw, Send, X, XCircle } f
 import { toast } from "react-toastify";
 import FlyoutPanel from "@components/ui/FlyoutPanel";
 import ActionButton from "@components/ui/ActionButton";
-import Spinner from "@components/ui/Spinner";
 import { getQuotationFollowups, getQuotationHistory, getQuotationPreview } from "../data/quotations.service";
 
 function QuotationPreviewFlyout({ isOpen, quotation, onClose, onSend, onStatusChange, onRevise, onScheduleFollowup, onCompleteFollowup }) {
@@ -63,7 +62,7 @@ function QuotationPreviewFlyout({ isOpen, quotation, onClose, onSend, onStatusCh
   };
 
   return (
-    <FlyoutPanel
+    <FlyoutPanel loading={loading}
       isOpen={isOpen}
       onClose={onClose}
       title={`Quotation Preview ${quotation?.quotation_no || ""}`}
@@ -77,9 +76,7 @@ function QuotationPreviewFlyout({ isOpen, quotation, onClose, onSend, onStatusCh
     >
       <div className="quotation-preview-layout">
         <div className="quotation-preview-document">
-          {loading ? (
-            <div className="quotation-preview-loading"><Spinner /></div>
-          ) : html ? (
+          {html ? (
             <iframe ref={iframeRef} srcDoc={html} title="Quotation preview" className="quotation-preview-frame shadow" />
           ) : (
             <div className="quotation-preview-loading">Preview is not available.</div>

@@ -108,6 +108,9 @@ export const companyMasterSchema = {
       ticket_include_year: 'y',
       ticket_prefix_padding: 3,
       ticket_no_reset: 'yearly',
+      google_review_enabled: "n",
+      google_review_link: "",
+
       // OWN DB CONFIG
       own_db_enabled: 'no',
       db_type: null,
@@ -193,6 +196,13 @@ export const companyMasterSchema = {
           { name: "ticket_prefix_padding", label: "Padding", type: "text", placeholder: "TKT", gridSpan: 2, },
           { name: "ticket_include_year", label: "Include Date", type: "radio", options: [{ label: "Yes", value: "y" }, { label: "No", value: "n" },], gridSpan: 3, },
           { name: "ticket_no_reset", label: "Reset preference", type: "radio", options: [{ label: "Daily", value: "daily" }, { label: "Monthly", value: "monthly" }, { label: "Yearly", value: "yearly" },], gridSpan: 5, },
+        ],
+      },
+      {
+        columns: 2,
+        fields: [
+          { name: "google_review_enabled", label: "Google Review Enabled", type: "radio", options: [{ label: "Yes", value: "y" }, { label: "No", value: "n" }], gridSpan: 4 },
+          { name: "google_review_link", label: "Google Review Link", type: "text", placeholder: "Enter Google Review Link", gridSpan: 4, visibleWhen: (values) => values.google_review_enabled === "y" },
         ],
       },
       {
@@ -284,6 +294,8 @@ export const companyMasterSchema = {
   validationSchema: z.object({
     company_name: z.string().trim().min(1, "Company name is required"),
     ticket_prefix: z.string().trim().min(1, "Ticket Prefix is required"),
+    google_review_enabled: z.enum(["y", "n"]).default("n"),
+    google_review_link: z.string().optional(),
     cc_email: z.union([z.literal(""), z.string().trim().email("Invalid CC email address")]).optional(),
     sender_email: z.string().trim().email("Invalid from email address"),
     sender_name: z.string().optional(),
@@ -311,17 +323,27 @@ export const companyMasterSchema = {
     happy_client_logos: z.array(z.any()).max(5, "You can upload up to 5 client logos").optional(),
     status: z.enum(["active", "inactive", "delete"]),
   }).superRefine((data, ctx) => {
-    if (data.mail_provider !== "custom") return;
+    if (data.mail_provider === "custom") {
+      ["smtp_host", "smtp_port", "smtp_encryption", "smtp_username"].forEach((field) => {
+        if (!data[field]) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [field],
+            message: `${field.replaceAll("_", " ")} is required`,
+          });
+        }
+      });
+    }
 
-    ["smtp_host", "smtp_port", "smtp_encryption", "smtp_username"].forEach((field) => {
-      if (!data[field]) {
+    if (data.google_review_enabled === "y") {
+      if (!data.google_review_link?.trim()) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: [field],
-          message: `${field.replaceAll("_", " ")} is required`,
+          path: ["google_review_link"],
+          message: "Google Review Link is required",
         });
       }
-    });
+    }
   }),
 };
 

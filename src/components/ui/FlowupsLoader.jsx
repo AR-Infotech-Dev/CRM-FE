@@ -1,3 +1,4 @@
+import { APP_NAME } from '@/api/config';
 import React, { useState, useEffect } from 'react';
 
 /**
@@ -39,8 +40,8 @@ const FlowupSLoader = () => {
         <div className="relative mb-8 group">
           <div className="absolute -inset-4 z-50  group-hover:opacity-50 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
           <img
-            src="./logo 1.png"
-            alt="FlowupS CallDesk Logo"
+            src="./logo.png"
+            alt={APP_NAME}
             className="relative h-27 w-auto object-contain drop-shadow-sm"
           />
         </div>

@@ -36,11 +36,7 @@ export default function NotificationBell() {
     /* ===================================================
        SHOW DESKTOP NOTIFICATION (FIXED)
     =================================================== */
-    const showDesktopNotification = ({
-        title = "New Notification",
-        message = "",
-        body = ""
-    }) => {
+    const showDesktopNotification = ({ title = "New Notification", message = "", body = "" }) => {
         if (!("Notification" in window)) return;
         if (Notification.permission !== "granted") return;
 
@@ -56,9 +52,6 @@ export default function NotificationBell() {
         setTimeout(() => notify.close(), 5000);
     };
 
-    /* ===================================================
-       GET COUNT (ONLY ON LOAD)
-    =================================================== */
     const getCount = useCallback(async () => {
         try {
             const now = Date.now();
@@ -89,10 +82,6 @@ export default function NotificationBell() {
             unreadCountRequest = null;
         }
     }, []);
-
-    /* ===================================================
-       GET LIST
-    =================================================== */
     const getNotifications = useCallback(async () => {
         try {
             const res = await makeRequest("/notifications",
@@ -108,10 +97,6 @@ export default function NotificationBell() {
             console.error(error);
         }
     }, []);
-
-    /* ===================================================
-       MARK READ
-    =================================================== */
     const readNotification = async (notification_id) => {
         try {
             const res = await makeRequest(`/notifications/read/${notification_id}`,
@@ -262,7 +247,7 @@ export default function NotificationBell() {
     const handleMarkAllClick = async () => {
         await readAllNotification();
     };
-    
+
     return (
         <div className="relative">
             <button onClick={openBell} className="topbar-utility topbar-utility-bell" >
@@ -281,20 +266,20 @@ export default function NotificationBell() {
                         <h3 className="text-xs font-semibold text-slate-800">
                             Notifications
                         </h3>
-                        
+
                         <h3>
 
-                        {!!count &&
-                            <span className="text-xs mr-1 font-light text-blue-800 hover:text-blue-400" onClick={handleMarkAllClick}>
-                                Mark all read
-                            </span>
-                        }
+                            {!!count &&
+                                <span className="text-xs mr-1 font-light text-blue-800 hover:text-blue-400" onClick={handleMarkAllClick}>
+                                    Mark all read
+                                </span>
+                            }
 
-                        {!!count && (
-                            <span className="text-[11px] text-slate-500">
-                                {count} unread
-                            </span>
-                        )}
+                            {!!count && (
+                                <span className="text-[11px] text-slate-500">
+                                    {count} unread
+                                </span>
+                            )}
                         </h3>
                     </div>
 

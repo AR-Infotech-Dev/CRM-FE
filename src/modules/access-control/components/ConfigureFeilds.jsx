@@ -18,7 +18,7 @@ function ConfigureFeilds({
   const allEditable = hasFields && fields.every((field) => Boolean(field.editable));
 
   return (
-    <FlyoutPanel
+    <FlyoutPanel loading={loadingAdvancedFields}
       isOpen={Boolean(isOpen)}
       onClose={onClose}
       title={title}
@@ -74,9 +74,7 @@ function ConfigureFeilds({
                 </label>
               </div>
 
-              {loadingAdvancedFields ? (
-                <div className="px-3 py-5 text-center text-xs text-slate-500">Loading fields...</div>
-              ) : fields.length ? (
+              {fields.length ? (
                 fields.map((field) => (
                   <div
                     key={field.key}

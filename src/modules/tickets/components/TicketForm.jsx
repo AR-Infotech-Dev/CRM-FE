@@ -182,11 +182,12 @@ function TicketForm({ isOpen, onClose, selectedTicket, onAfterSave, menu_id }) {
       })
       : TAB_ITEMS.filter(([key]) => key === "client" || key === "comments");
 
-  if (!isOpen) return null;
+
   return (
     <>
       <FlyoutPanel
         isOpen={isOpen}
+        loading={fetchingTicket}
         onClose={handleClose}
         title={selectedTicket ? "Edit Ticket" : "Create Ticket"}
         subtitle={
@@ -222,15 +223,45 @@ function TicketForm({ isOpen, onClose, selectedTicket, onAfterSave, menu_id }) {
       >
         <div className="flyout-form-shell ticket-form-shell">
           <div className="ws-main-container">
-            {fetchingTicket ? (
-              <div className="p-5 text-center">
-                <Spinner />
-              </div>
-            ) : (
-              <div className="ticket-drawer-layout grid grid-cols-12 overflow-hidden rounded-xl bg-white">
-                <div className="ticket-scroll-pane col-span-12 min-w-0 overflow-y-auto border-r border-slate-200 px-4 py-2 lg:col-span-6 xl:col-span-7">
+            <div className="ticket-drawer-layout grid grid-cols-12 overflow-hidden rounded-xl bg-white">
+              <div className="ticket-scroll-pane col-span-12 min-w-0 overflow-y-auto border-r border-slate-200 px-4 py-2 lg:col-span-6 xl:col-span-7">
+                <DynamicModuleForm
+                  sections={FORM_SECTIONS_BEFORE_CONTACT}
+                  values={formData}
+                  onChange={handleChange}
+                  onObjectSelect={handleObjectSelect}
+                  addNewHandlers={{
+                    client_id: openCustomerCreate,
+                  }}
+                  errors={errors}
+                  mode={mode}
+                  oldValues={oldformData}
+                  menuId={menu_id}
+                />
+                {!showContactPanel && (
+                  <div className="mb-1 flex w-full justify-end">
+                    <button
+                      type="button"
+                      disabled={!formData.client_id}
+                      className="flex items-center gap-1.5 rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200 disabled:cursor-not-allowed disabled:opacity-50"
+                      onClick={openContactPanel}
+                    >
+                      <UserPlus size={13} />
+                      Add new contact
+                    </button>
+                  </div>
+                )}
+
+                <QuickAddContactPanel
+                  formData={formData}
+                  errors={errors}
+                  onChange={handleQuickContactChange}
+                  showContactPanel={showContactPanel}
+                  onCancel={closeContactPanel}
+                />
+                {FORM_SECTIONS_AFTER_CONTACT.length > 0 && (
                   <DynamicModuleForm
-                    sections={FORM_SECTIONS_BEFORE_CONTACT}
+                    sections={FORM_SECTIONS_AFTER_CONTACT}
                     values={formData}
                     onChange={handleChange}
                     onObjectSelect={handleObjectSelect}
@@ -242,79 +273,43 @@ function TicketForm({ isOpen, onClose, selectedTicket, onAfterSave, menu_id }) {
                     oldValues={oldformData}
                     menuId={menu_id}
                   />
-                  {!showContactPanel && (
-                    <div className="mb-1 flex w-full justify-end">
+                )}
+              </div>
+              <div className="col-span-12 flex min-h-60 min-w-0 flex-col overflow-hidden bg-slate-50 lg:col-span-6 xl:col-span-5">
+                <div className="border-b border-slate-200 bg-white px-4 py-2">
+                  <div className="flex items-center gap-4 overflow-visible">
+                    {visibleTabs.map(([key, label, Icon]) => (
                       <button
+                        key={key}
                         type="button"
-                        disabled={!formData.client_id}
-                        className="flex items-center gap-1.5 rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200 disabled:cursor-not-allowed disabled:opacity-50"
-                        onClick={openContactPanel}
+                        onClick={() => setTab(key)}
+                        className={`ticket-tab-icon-button ${tab === key ? "active" : ""}`}
+                        aria-label={label}
+                        data-tooltip={label}
                       >
-                        <UserPlus size={13} />
-                        Add new contact
+                        <Icon size={17} />
                       </button>
-                    </div>
-                  )}
-
-                  <QuickAddContactPanel
-                    formData={formData}
-                    errors={errors}
-                    onChange={handleQuickContactChange}
-                    showContactPanel={showContactPanel}
-                    onCancel={closeContactPanel}
-                  />
-                  {FORM_SECTIONS_AFTER_CONTACT.length > 0 && (
-                    <DynamicModuleForm
-                      sections={FORM_SECTIONS_AFTER_CONTACT}
-                      values={formData}
-                      onChange={handleChange}
-                      onObjectSelect={handleObjectSelect}
-                      addNewHandlers={{
-                        client_id: openCustomerCreate,
-                      }}
-                      errors={errors}
-                      mode={mode}
-                      oldValues={oldformData}
-                      menuId={menu_id}
-                    />
-                  )}
+                    ))}
+                  </div>
                 </div>
-                <div className="col-span-12 flex min-h-60 min-w-0 flex-col overflow-hidden bg-slate-50 lg:col-span-6 xl:col-span-5">
-                  <div className="border-b border-slate-200 bg-white px-4 py-2">
-                    <div className="flex items-center gap-4 overflow-visible">
-                      {visibleTabs.map(([key, label, Icon]) => (
-                        <button
-                          key={key}
-                          type="button"
-                          onClick={() => setTab(key)}
-                          className={`ticket-tab-icon-button ${tab === key ? "active" : ""}`}
-                          aria-label={label}
-                          data-tooltip={label}
-                        >
-                          <Icon size={17} />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className={`min-h-0 flex-1 min-w-0 ${tab === "client" ? "overflow-hidden" : "ticket-scroll-pane overflow-y-auto p-2"}`}>
-                    {tab === "client" && (
-                      <div className="flex h-full min-h-0 flex-col overflow-hidden">
-                        <div className="min-h-0 flex-1 overflow-hidden">
-                          <ClientHistory openedTiket={ticketId} client={selectedCustomer} />
-                        </div>
+                <div className={`min-h-0 flex-1 min-w-0 ${tab === "client" ? "overflow-hidden" : "ticket-scroll-pane overflow-y-auto p-2"}`}>
+                  {tab === "client" && (
+                    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+                      <div className="min-h-0 flex-1 overflow-hidden">
+                        <ClientHistory openedTiket={ticketId} client={selectedCustomer} />
                       </div>
-                    )}
-                    {tab === "comments" && mode === "create" && (
-                      <InitialCommentDraft value={formData.initial_comment || ""} onChange={handleChange} />
-                    )}
-                    {tab === "comments" && mode === "edit" && <Comments module="tickets" client={selectedCustomer} ticket_id={ticketId} />}
-                    {tab === "history" && mode === "edit" && <TicketHistory ticket_id={ticketId} />}
-                    {tab === "work_logs" && mode === "edit" && <WorkLogs ticket={formData} ticket_id={ticketId} onAfterSave={afterWorkLogSave} />}
-                    {tab === "visits" && mode === "edit" && formData.visit_required === "y" && <Visits ticket={formData} ticket_id={ticketId} />}
-                  </div>
+                    </div>
+                  )}
+                  {tab === "comments" && mode === "create" && (
+                    <InitialCommentDraft value={formData.initial_comment || ""} onChange={handleChange} />
+                  )}
+                  {tab === "comments" && mode === "edit" && <Comments module="tickets" client={selectedCustomer} ticket_id={ticketId} />}
+                  {tab === "history" && mode === "edit" && <TicketHistory ticket_id={ticketId} />}
+                  {tab === "work_logs" && mode === "edit" && <WorkLogs ticket={formData} ticket_id={ticketId} onAfterSave={afterWorkLogSave} />}
+                  {tab === "visits" && mode === "edit" && formData.visit_required === "y" && <Visits ticket={formData} ticket_id={ticketId} />}
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </FlyoutPanel >

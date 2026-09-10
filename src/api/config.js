@@ -1,7 +1,7 @@
 export const API_SERVER_URL = import.meta.env.VITE_API_SERVER_URL || "http://localhost:3000";
 export const API_BASE_URL = `${API_SERVER_URL}/api/v1` || "http://localhost:3000/api/v1";
-export const APP_NAME = import.meta.env.APP_NAME || "FlowupS CallDesk" ;
-
+export const APP_NAME = import.meta.env.VITE_APP_NAME || "FlowupS";
+export const ALLOW_NOTIFICATIONS = Number(import.meta.env.VITE_ALLOW_NOTIFICATIONS) !== 0 || false;
 export const DEFAULT_HEADERS = {
   "Content-Type": "application/json",
   'Accept': 'application/json',
@@ -10,7 +10,6 @@ export const DEFAULT_HEADERS = {
 
 export const getDefaultHeaders = () => {
   const authid = localStorage.getItem("_auth_id");
-
   return {
     "Content-Type": "application/json",
     "Accept": "application/json",

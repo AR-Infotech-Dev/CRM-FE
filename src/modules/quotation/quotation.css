@@ -287,7 +287,7 @@
 .quotation-preview-frame {
   display: block;
   width: 100%;
-  height: calc(100vh - 118px);
+  height: calc(100vh - 86px);
   border: 0;
   background: #eef2f7;
   scrollbar-width: none;

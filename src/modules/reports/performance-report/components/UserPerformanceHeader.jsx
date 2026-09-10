@@ -41,7 +41,6 @@ export function UserPerformanceToolbar({
         />
       </div>
 
-      {/* To Date */}
       <div className="flex flex-col gap-1">
         <label className="text-xs font-semibold text-slate-600">
           To Date
@@ -57,7 +56,6 @@ export function UserPerformanceToolbar({
         />
       </div>
 
-      {/* Export Excel */}
       <button
         type="button"
         className="performance-button"
